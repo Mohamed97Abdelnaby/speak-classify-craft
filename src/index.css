@@ -2,41 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Voice AI - Modern Design System */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Colors */
+    --background: 250 100% 99%;
+    --foreground: 223 39% 12%;
 
+    /* Primary Brand Colors */
+    --primary: 231 48% 48%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 235 85% 65%;
+    
+    /* Secondary Colors */
+    --secondary: 240 19% 96%;
+    --secondary-foreground: 223 39% 12%;
+    
+    /* Accent Colors */
+    --accent: 280 100% 97%;
+    --accent-foreground: 280 26% 16%;
+    
+    /* Surface Colors */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --card-foreground: 223 39% 12%;
+    --card-hover: 240 19% 98%;
+    
+    /* Interactive States */
+    --muted: 240 19% 96%;
+    --muted-foreground: 223 16% 58%;
+    
+    /* Borders & Inputs */
+    --border: 240 19% 91%;
+    --input: 240 19% 93%;
+    --ring: 231 48% 48%;
+    
+    /* Status Colors */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 120 40% 48%;
+    --success-foreground: 0 0% 100%;
+    --warning: 35 100% 50%;
+    --warning-foreground: 0 0% 100%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(231 48% 48%) 0%, hsl(235 85% 65%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(240 19% 96%) 0%, hsl(240 100% 99%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(280 100% 97%) 0%, hsl(240 100% 99%) 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(223 39% 12% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(223 39% 12% / 0.1), 0 2px 4px -1px hsl(223 39% 12% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(223 39% 12% / 0.1), 0 4px 6px -2px hsl(223 39% 12% / 0.05);
+    --shadow-glow: 0 0 20px hsl(231 48% 48% / 0.3);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Spacing & Layout */
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
