@@ -1,6 +1,7 @@
 import Navigation from "@/components/Navigation";
 import VoiceRecorder from "@/components/VoiceRecorder";
 import TranscriptionResults from "@/components/TranscriptionResults";
+import CategoryManager from "@/components/CategoryManager";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -84,7 +85,7 @@ const Index = () => {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           {/* Voice Input Section */}
           <div className="lg:col-span-1">
             <VoiceRecorder />
@@ -109,6 +110,16 @@ const Index = () => {
                 </CardContent>
               </Card>
             )}
+          </div>
+        </div>
+
+        {/* Category Management Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <CategoryManager />
+          </div>
+          <div className="lg:col-span-2">
+            {/* Placeholder for future features */}
           </div>
         </div>
       </main>
