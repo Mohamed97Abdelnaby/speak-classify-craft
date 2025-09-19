@@ -10,8 +10,10 @@ import {
   Trash2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const VoiceRecorder = () => {
+  const navigate = useNavigate();
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -107,6 +109,10 @@ const VoiceRecorder = () => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
+  };
+
+  const handleTranscribe = () => {
+    navigate("/processing");
   };
 
   const formatTime = (seconds: number) => {
@@ -241,6 +247,7 @@ const VoiceRecorder = () => {
         {/* Transcribe Button */}
         {(audioBlob || uploadedFile) && (
           <Button
+            onClick={handleTranscribe}
             className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground py-3 rounded-xl shadow-md"
             size="lg"
           >
