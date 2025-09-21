@@ -205,8 +205,8 @@ const VoiceRecorder = () => {
     // Store in localStorage
     localStorage.setItem(`batch-${batchId}`, JSON.stringify(batchData));
     
-    // Navigate to processing
-    navigate(`/processing?batch=${batchId}`);
+    // Navigate to email option page
+    navigate(`/email-option?batch=${batchId}`);
   };
 
   const formatTime = (seconds: number) => {
