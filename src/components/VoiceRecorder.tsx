@@ -1,16 +1,21 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { 
   Mic, 
   Square, 
   Upload, 
   Play, 
   Pause,
-  Trash2
+  Trash2,
+  X,
+  FileAudio
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { BatchFile } from "@/types/batch";
 
 const VoiceRecorder = () => {
   const navigate = useNavigate();
@@ -18,11 +23,23 @@ const VoiceRecorder = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<BatchFile[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [isDragOver, setIsDragOver] = useState(false);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { toast } = useToast();
+
+  // Mock categories - replace with real data later
+  const categories = [
+    "Meeting",
+    "Interview", 
+    "Lecture",
+    "Phone Call",
+    "Presentation",
+    "Other"
+  ];
 
   const startRecording = async () => {
     try {
@@ -37,7 +54,17 @@ const VoiceRecorder = () => {
       mediaRecorder.current.onstop = () => {
         const blob = new Blob(chunks, { type: 'audio/wav' });
         setAudioBlob(blob);
-        setUploadedFile(null);
+        
+        // Convert recording to BatchFile
+        const recordedFile: BatchFile = {
+          id: `recorded-${Date.now()}`,
+          name: `Recording ${new Date().toLocaleTimeString()}`,
+          file: new File([blob], `recording-${Date.now()}.wav`, { type: 'audio/wav' }),
+          status: 'uploading',
+          category: selectedCategory || undefined
+        };
+        
+        setUploadedFiles(prev => [...prev, recordedFile]);
       };
 
       mediaRecorder.current.start();
@@ -71,23 +98,56 @@ const VoiceRecorder = () => {
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith('audio/')) {
-        setUploadedFile(file);
-        setAudioBlob(null);
-        toast({
-          title: "File Uploaded",
-          description: `Successfully uploaded ${file.name}`,
-        });
-      } else {
-        toast({
-          title: "Invalid File",
-          description: "Please upload an audio file.",
-          variant: "destructive",
-        });
-      }
+    const files = Array.from(event.target.files || []);
+    addFiles(files);
+  };
+
+  const addFiles = (files: File[]) => {
+    const validFiles = files.filter(file => file.type.startsWith('audio/'));
+    const invalidFiles = files.length - validFiles.length;
+    
+    if (invalidFiles > 0) {
+      toast({
+        title: "Invalid Files",
+        description: `${invalidFiles} non-audio files were skipped.`,
+        variant: "destructive",
+      });
     }
+    
+    const newBatchFiles: BatchFile[] = validFiles.map(file => ({
+      id: `${Date.now()}-${Math.random()}`,
+      name: file.name,
+      file,
+      status: 'uploading',
+      category: selectedCategory || undefined
+    }));
+    
+    setUploadedFiles(prev => [...prev, ...newBatchFiles]);
+    setAudioBlob(null);
+    
+    if (validFiles.length > 0) {
+      toast({
+        title: "Files Added",
+        description: `Successfully added ${validFiles.length} audio file(s)`,
+      });
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    addFiles(droppedFiles);
   };
 
   const playPauseAudio = () => {
@@ -103,7 +163,7 @@ const VoiceRecorder = () => {
 
   const clearAudio = () => {
     setAudioBlob(null);
-    setUploadedFile(null);
+    setUploadedFiles([]);
     setIsPlaying(false);
     if (audioRef.current) {
       audioRef.current.pause();
@@ -111,8 +171,42 @@ const VoiceRecorder = () => {
     }
   };
 
+  const removeFile = (fileId: string) => {
+    setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
+  };
+
+  const updateFileCategory = (fileId: string, category: string) => {
+    setUploadedFiles(prev => prev.map(f => 
+      f.id === fileId ? { ...f, category } : f
+    ));
+  };
+
+  const assignCategoryToAll = () => {
+    if (!selectedCategory) return;
+    setUploadedFiles(prev => prev.map(f => ({ ...f, category: selectedCategory })));
+    toast({
+      title: "Category Assigned",
+      description: `All files assigned to "${selectedCategory}" category`,
+    });
+  };
+
   const handleTranscribe = () => {
-    navigate("/processing");
+    if (uploadedFiles.length === 0 && !audioBlob) return;
+    
+    // Create batch data
+    const batchId = `batch-${Date.now()}`;
+    const batchData = {
+      id: batchId,
+      files: uploadedFiles.map(f => ({ ...f, status: 'transcribing' as const })),
+      createdAt: new Date(),
+      status: 'processing' as const
+    };
+    
+    // Store in localStorage
+    localStorage.setItem(`batch-${batchId}`, JSON.stringify(batchData));
+    
+    // Navigate to processing
+    navigate(`/processing?batch=${batchId}`);
   };
 
   const formatTime = (seconds: number) => {
@@ -123,8 +217,8 @@ const VoiceRecorder = () => {
 
   const currentAudioSource = audioBlob 
     ? URL.createObjectURL(audioBlob) 
-    : uploadedFile 
-      ? URL.createObjectURL(uploadedFile) 
+    : uploadedFiles.length === 1 
+      ? URL.createObjectURL(uploadedFiles[0].file) 
       : null;
 
   return (
@@ -181,27 +275,131 @@ const VoiceRecorder = () => {
           </div>
         </div>
 
-        <div className="text-center">
+        {/* Drag and Drop Upload */}
+        <div 
+          className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+            isDragOver 
+              ? 'border-primary bg-primary/5' 
+              : 'border-border hover:border-primary/50'
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+          <h3 className="font-medium mb-2">Drop audio files here</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Or click to select multiple files
+          </p>
           <Button
             onClick={() => fileInputRef.current?.click()}
             variant="outline"
             size="lg"
-            className="px-8 py-4 rounded-xl border-dashed border-2 hover:bg-card-hover"
+            className="px-8 py-3"
           >
-            <Upload className="w-6 h-6 mr-2" />
-            Upload Audio File
+            Select Files
           </Button>
           <input
             ref={fileInputRef}
             type="file"
             accept="audio/*"
+            multiple
             onChange={handleFileUpload}
             className="hidden"
           />
         </div>
 
-        {/* Audio Preview */}
-        {(audioBlob || uploadedFile) && (
+        {/* Category Selection */}
+        {uploadedFiles.length > 0 && (
+          <Card className="bg-accent/50">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(category => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    onClick={assignCategoryToAll}
+                    disabled={!selectedCategory}
+                    size="sm"
+                    variant="outline"
+                  >
+                    Apply to All
+                  </Button>
+                </div>
+                <Badge variant="secondary">
+                  {uploadedFiles.length} file{uploadedFiles.length !== 1 ? 's' : ''}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Files Preview */}
+        {uploadedFiles.length > 0 && (
+          <div className="space-y-3">
+            <h4 className="font-medium text-sm">Selected Files ({uploadedFiles.length})</h4>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {uploadedFiles.map((file) => (
+                <Card key={file.id} className="bg-accent/30">
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        <FileAudio className="w-4 h-4 text-primary flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium truncate">{file.name}</p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            {file.category ? (
+                              <Badge variant="outline" className="text-xs">
+                                {file.category}
+                              </Badge>
+                            ) : (
+                              <Select
+                                value={file.category || ""}
+                                onValueChange={(value) => updateFileCategory(file.id, value)}
+                              >
+                                <SelectTrigger className="h-6 text-xs w-32">
+                                  <SelectValue placeholder="Category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {categories.map(category => (
+                                    <SelectItem key={category} value={category}>
+                                      {category}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => removeFile(file.id)}
+                        size="sm"
+                        variant="ghost"
+                        className="flex-shrink-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Single Audio Preview */}
+        {audioBlob && uploadedFiles.length === 0 && (
           <Card className="bg-accent border-accent-foreground/20">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -218,9 +416,7 @@ const VoiceRecorder = () => {
                     )}
                   </Button>
                   <div>
-                    <p className="text-sm font-medium">
-                      {uploadedFile ? uploadedFile.name : "Recorded Audio"}
-                    </p>
+                    <p className="text-sm font-medium">Recorded Audio</p>
                     <p className="text-xs text-muted-foreground">Ready to transcribe</p>
                   </div>
                 </div>
@@ -245,13 +441,16 @@ const VoiceRecorder = () => {
         )}
 
         {/* Transcribe Button */}
-        {(audioBlob || uploadedFile) && (
+        {(audioBlob || uploadedFiles.length > 0) && (
           <Button
             onClick={handleTranscribe}
             className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground py-3 rounded-xl shadow-md"
             size="lg"
           >
-            Transcribe & Classify
+            {uploadedFiles.length > 1 
+              ? `Process ${uploadedFiles.length} Files` 
+              : 'Transcribe & Classify'
+            }
           </Button>
         )}
       </CardContent>
