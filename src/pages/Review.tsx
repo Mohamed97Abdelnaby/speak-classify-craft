@@ -214,26 +214,18 @@ const Review = () => {
         {completedFiles.length > 0 && (
           <div className="mt-8 flex justify-center">
             <div className="bg-muted/20 rounded-lg border p-6 min-w-[300px] text-center">
-              <div className="flex items-center justify-center gap-4">
-                <Button
-                  size="lg"
-                  onClick={() => {
-                    toast({
-                      title: "التصنيف",
-                      description: "سيتم إضافة وظيفة التصنيف قريباً",
-                    });
-                  }}
-                  className="text-lg px-8"
-                >
-                  صنف
-                </Button>
-                <Badge variant="outline" className="text-lg px-3 py-1">
-                  86%
-                </Badge>
-                <Badge variant="secondary" className="text-sm">
-                  غير مصنف
-                </Badge>
-              </div>
+              <Button
+                size="lg"
+                onClick={() => {
+                  toast({
+                    title: "التصنيف",
+                    description: "سيتم إضافة وظيفة التصنيف قريباً",
+                  });
+                }}
+                className="text-lg px-8"
+              >
+                صنف
+              </Button>
             </div>
           </div>
         )}
