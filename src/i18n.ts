@@ -71,6 +71,8 @@ const resources = {
       startOver: "بدء جديد",
       backToHome: "العودة للرئيسية",
       callId: "معرف المكالمة",
+      fileName: "اسم الملف",
+      transcribedText: "النص المكتوب",
       summary: "الملخص",
       classification: "التصنيف",
       noResultsFound: "لم يتم العثور على نتائج",

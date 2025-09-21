@@ -30,7 +30,7 @@ const Review = () => {
   }, [batchId, navigate]);
 
   const downloadCSV = () => {
-    const completedFiles = files.filter(f => f.status === 'completed' && f.classification);
+    const completedFiles = files.filter(f => f.status === 'completed' && f.transcription);
     
     if (completedFiles.length === 0) {
       toast({
@@ -41,14 +41,14 @@ const Review = () => {
       return;
     }
 
-    const headers = [t("callId"), 'اسم الملف', t("summary"), t("classification"), 'الثقة'];
+    const headers = [t("callId"), t("fileName"), t("transcribedText"), t("classification"), 'الثقة'];
     const csvContent = [
       headers.join(','),
       ...completedFiles.map(file => {
         const row = [
           file.id,
           `"${file.name}"`,
-          `"${(file.summary || '').replace(/"/g, '""')}"`,
+          `"${(file.transcription || '').replace(/"/g, '""')}"`,
           file.classification?.predicted || '',
           file.classification?.confidence || ''
         ];
@@ -71,7 +71,7 @@ const Review = () => {
     });
   };
 
-  const completedFiles = files.filter(f => f.status === 'completed' && f.classification);
+  const completedFiles = files.filter(f => f.status === 'completed' && f.transcription);
 
   if (files.length === 0) {
     return (
@@ -161,8 +161,8 @@ const Review = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t("callId")}</TableHead>
-                  <TableHead>{t("summary")}</TableHead>
+                  <TableHead>{t("fileName")}</TableHead>
+                  <TableHead>{t("transcribedText")}</TableHead>
                   <TableHead>{t("classification")}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -173,14 +173,14 @@ const Review = () => {
                       {file.name}
                     </TableCell>
                     <TableCell className="max-w-md">
-                      <div className="truncate" title={file.summary}>
-                        {file.summary || 'No summary available'}
+                      <div className="truncate" title={file.transcription}>
+                        {file.transcription || 'لا يوجد نص متاح'}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         <Badge variant="default">
-                          {file.classification?.predicted || 'Unknown'}
+                          {file.classification?.predicted || 'غير مصنف'}
                         </Badge>
                         {file.classification?.confidence && (
                           <Badge variant="outline" className="text-xs">
