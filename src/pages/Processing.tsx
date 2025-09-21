@@ -28,6 +28,9 @@ const Processing = () => {
   const processAudioFiles = useCallback(async (batchData: BatchData) => {
     const updatedFiles = [...batchData.files];
     let completedCount = 0;
+    
+    // Import serialization utility once
+    const { serializeBatchData } = await import('@/utils/fileSerializer');
 
     for (let i = 0; i < updatedFiles.length; i++) {
       const file = updatedFiles[i];
@@ -36,9 +39,10 @@ const Processing = () => {
       // Update status to transcribing
       updatedFiles[i] = { ...file, status: 'transcribing' };
       
-      // Update localStorage with current progress
+      // Update localStorage with current progress - serialize the updated batch
       const progressBatch = { ...batchData, files: updatedFiles };
-      localStorage.setItem(`batch-${batchId}`, JSON.stringify(progressBatch));
+      const serializedProgress = await serializeBatchData(progressBatch);
+      localStorage.setItem(`batch-${batchId}`, JSON.stringify(serializedProgress));
       
       try {
         // Transcribe the audio file
@@ -69,9 +73,10 @@ const Processing = () => {
         console.error(`Error processing ${file.name}:`, error);
       }
       
-      // Update localStorage after each file
+      // Update localStorage after each file - serialize the final batch
       const finalBatch = { ...batchData, files: updatedFiles };
-      localStorage.setItem(`batch-${batchId}`, JSON.stringify(finalBatch));
+      const serializedFinal = await serializeBatchData(finalBatch);
+      localStorage.setItem(`batch-${batchId}`, JSON.stringify(serializedFinal));
     }
 
     // Navigate to review page when all files are processed
@@ -102,12 +107,31 @@ const Processing = () => {
       return;
     }
 
-    const batchData: BatchData = JSON.parse(batchDataString);
-    setTotalFiles(batchData.files.length);
-    
-    // Start processing audio files
-    processAudioFiles(batchData);
-  }, [batchId, navigate, processAudioFiles]);
+    try {
+      // Parse the serialized batch data
+      const serializedBatchData = JSON.parse(batchDataString);
+      
+      // Import deserialization utility
+      import('@/utils/fileSerializer').then(({ deserializeBatchData }) => {
+        const batchData: BatchData = deserializeBatchData(serializedBatchData);
+        setTotalFiles(batchData.files.length);
+        
+        // Start processing audio files
+        processAudioFiles(batchData);
+      }).catch(error => {
+        console.error('Failed to deserialize batch data:', error);
+        toast({
+          title: t("error"),
+          description: "Failed to load batch data",
+          variant: "destructive",
+        });
+        navigate("/");
+      });
+    } catch (error) {
+      console.error('Failed to parse batch data:', error);
+      navigate("/");
+    }
+  }, [batchId, navigate, processAudioFiles, toast, t]);
 
 
   return (

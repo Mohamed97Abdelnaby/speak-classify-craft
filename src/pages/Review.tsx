@@ -18,11 +18,30 @@ const Review = () => {
   const batchId = searchParams.get('batch');
 
   useEffect(() => {
+    if (!batchId) {
+      navigate("/");
+      return;
+    }
+
     // Load batch data from localStorage
-    const batchData = localStorage.getItem(`batch-${batchId}`);
-    if (batchData) {
-      const batch = JSON.parse(batchData);
-      setFiles(batch.files || []);
+    const batchDataString = localStorage.getItem(`batch-${batchId}`);
+    if (batchDataString) {
+      try {
+        // Parse the serialized batch data
+        const serializedBatchData = JSON.parse(batchDataString);
+        
+        // Import deserialization utility and convert back to BatchData
+        import('@/utils/fileSerializer').then(({ deserializeBatchData }) => {
+          const batchData = deserializeBatchData(serializedBatchData);
+          setFiles(batchData.files || []);
+        }).catch(error => {
+          console.error('Failed to deserialize batch data:', error);
+          navigate("/");
+        });
+      } catch (error) {
+        console.error('Failed to parse batch data:', error);
+        navigate("/");
+      }
     } else {
       // Redirect if no batch data found
       navigate("/");

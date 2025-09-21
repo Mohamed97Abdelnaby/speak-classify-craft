@@ -193,23 +193,38 @@ const VoiceRecorder = () => {
     });
   };
 
-  const handleTranscribe = () => {
+  const handleTranscribe = async () => {
     if (uploadedFiles.length === 0 && !audioBlob) return;
     
-    // Create batch data
-    const batchId = `batch-${Date.now()}`;
-    const batchData = {
-      id: batchId,
-      files: uploadedFiles.map(f => ({ ...f, status: 'transcribing' as const })),
-      createdAt: new Date(),
-      status: 'processing' as const
-    };
-    
-    // Store in localStorage
-    localStorage.setItem(`batch-${batchId}`, JSON.stringify(batchData));
-    
-    // Navigate to email option page
-    navigate(`/email-option?batch=${batchId}`);
+    try {
+      // Create batch data
+      const batchId = `batch-${Date.now()}`;
+      const batchData = {
+        id: batchId,
+        files: uploadedFiles.map(f => ({ ...f, status: 'transcribing' as const })),
+        createdAt: new Date(),
+        status: 'processing' as const
+      };
+      
+      // Import serialization utilities
+      const { serializeBatchData } = await import('@/utils/fileSerializer');
+      
+      // Serialize batch data for localStorage storage
+      const serializedBatchData = await serializeBatchData(batchData);
+      
+      // Store serialized data in localStorage
+      localStorage.setItem(`batch-${batchId}`, JSON.stringify(serializedBatchData));
+      
+      // Navigate to email option page
+      navigate(`/email-option?batch=${batchId}`);
+    } catch (error) {
+      console.error('Failed to prepare batch data:', error);
+      toast({
+        title: t("error"),
+        description: "Failed to prepare files for transcription",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatTime = (seconds: number) => {
