@@ -34,14 +34,14 @@ const Review = () => {
     
     if (completedFiles.length === 0) {
       toast({
-        title: "No Results",
-        description: "No completed classifications available for download.",
+        title: t("noResultsFound"),
+        description: t("noResultsToDownload"),
         variant: "destructive",
       });
       return;
     }
 
-    const headers = ['Call ID', 'File Name', 'Summary', 'Classification', 'Confidence'];
+    const headers = [t("callId"), 'اسم الملف', t("summary"), t("classification"), 'الثقة'];
     const csvContent = [
       headers.join(','),
       ...completedFiles.map(file => {
@@ -66,8 +66,8 @@ const Review = () => {
     document.body.removeChild(link);
 
     toast({
-      title: "Export Successful",
-      description: "Classification results downloaded successfully.",
+      title: t("success"),
+      description: t("resultsDownloaded"),
     });
   };
 
@@ -97,15 +97,15 @@ const Review = () => {
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 space-x-reverse">
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate("/")}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 space-x-reverse"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Home</span>
+              <span>{t("backToHome")}</span>
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-foreground">
@@ -117,22 +117,22 @@ const Review = () => {
             </div>
           </div>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 space-x-reverse">
             <Button
               onClick={downloadCSV}
               variant="outline"
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 space-x-reverse"
               disabled={completedFiles.length === 0}
             >
               <Download className="w-4 h-4" />
-              <span>Download Results</span>
+              <span>{t("downloadResults")}</span>
             </Button>
             <Button
               onClick={() => navigate("/")}
-              className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2"
+              className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse"
             >
               <RotateCcw className="w-4 h-4" />
-              <span>Start Over</span>
+              <span>{t("startOver")}</span>
             </Button>
           </div>
         </div>
@@ -161,9 +161,9 @@ const Review = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Call ID</TableHead>
-                  <TableHead>Summary</TableHead>
-                  <TableHead>Classification</TableHead>
+                  <TableHead>{t("callId")}</TableHead>
+                  <TableHead>{t("summary")}</TableHead>
+                  <TableHead>{t("classification")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

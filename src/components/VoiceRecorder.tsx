@@ -303,161 +303,153 @@ const VoiceRecorder = () => {
             {t("uploadFiles")}
           </Button>
         </div>
-          </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="audio/*"
-            multiple
-            onChange={handleFileUpload}
-            className="hidden"
-          />
-        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="audio/*"
+          onChange={handleFileUpload}
+          className="hidden"
+        />
 
         {/* Category Selection */}
-        {uploadedFiles.length > 0 && (
-          <Card className="bg-accent/50">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button 
-                    onClick={assignCategoryToAll}
-                    disabled={!selectedCategory}
-                    size="sm"
-                    variant="outline"
-                  >
-                    Apply to All
-                  </Button>
-                </div>
-                <Badge variant="secondary">
-                  {uploadedFiles.length} file{uploadedFiles.length !== 1 ? 's' : ''}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">{t("selectCategory")}</label>
+            {selectedCategory && uploadedFiles.length > 1 && (
+              <Button
+                onClick={assignCategoryToAll}
+                size="sm"
+                variant="outline"
+                className="text-xs"
+              >
+                {t("selectForAll")}
+              </Button>
+            )}
+          </div>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger>
+              <SelectValue placeholder={t("selectCategory")} />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        {/* Files Preview */}
+        {/* Files List */}
         {uploadedFiles.length > 0 && (
           <div className="space-y-3">
-            <h4 className="font-medium text-sm">Selected Files ({uploadedFiles.length})</h4>
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {uploadedFiles.map((file) => (
-                <Card key={file.id} className="bg-accent/30">
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3 flex-1 min-w-0">
-                        <FileAudio className="w-4 h-4 text-primary flex-shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium truncate">{file.name}</p>
-                          <div className="flex items-center space-x-2 mt-1">
-                            {file.category ? (
-                              <Badge variant="outline" className="text-xs">
-                                {file.category}
-                              </Badge>
-                            ) : (
-                              <Select
-                                value={file.category || ""}
-                                onValueChange={(value) => updateFileCategory(file.id, value)}
-                              >
-                                <SelectTrigger className="h-6 text-xs w-32">
-                                  <SelectValue placeholder="Category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {categories.map(category => (
-                                    <SelectItem key={category} value={category}>
-                                      {category}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <Button
-                        onClick={() => removeFile(file.id)}
-                        size="sm"
-                        variant="ghost"
-                        className="flex-shrink-0"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
+            <h3 className="text-sm font-medium text-foreground">
+              الملفات المرفوعة ({uploadedFiles.length})
+            </h3>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {uploadedFiles.map((file, index) => (
+                <div
+                  key={file.id}
+                  className="flex items-center justify-between p-3 border border-border rounded-lg bg-card hover:bg-card-hover transition-colors"
+                >
+                  <div className="flex items-center space-x-3 space-x-reverse flex-1 min-w-0">
+                    <FileAudio className="w-5 h-5 text-primary flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {file.name}
+                      </p>
+                      {file.category && (
+                        <Badge variant="secondary" className="text-xs mt-1">
+                          {file.category}
+                        </Badge>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 space-x-reverse flex-shrink-0">
+                    <Select
+                      value={file.category || ""}
+                      onValueChange={(category) => updateFileCategory(file.id, category)}
+                    >
+                      <SelectTrigger className="w-32 h-8 text-xs">
+                        <SelectValue placeholder="فئة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category} value={category} className="text-xs">
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    <Button
+                      onClick={() => removeFile(file.id)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Single Audio Preview */}
-        {audioBlob && uploadedFiles.length === 0 && (
-          <Card className="bg-accent border-accent-foreground/20">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Button
-                    onClick={playPauseAudio}
-                    size="sm"
-                    variant="secondary"
-                  >
-                    {isPlaying ? (
-                      <Pause className="w-4 h-4" />
-                    ) : (
-                      <Play className="w-4 h-4" />
-                    )}
-                  </Button>
-                  <div>
-                    <p className="text-sm font-medium">Recorded Audio</p>
-                    <p className="text-xs text-muted-foreground">Ready to transcribe</p>
-                  </div>
-                </div>
-                <Button
-                  onClick={clearAudio}
-                  size="sm"
-                  variant="outline"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-              {currentAudioSource && (
-                <audio
-                  ref={audioRef}
-                  src={currentAudioSource}
-                  onEnded={() => setIsPlaying(false)}
-                  className="hidden"
-                />
-              )}
-            </CardContent>
-          </Card>
+        {/* Audio Preview */}
+        {currentAudioSource && (
+          <div className="p-4 border border-border rounded-lg bg-card">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium">معاينة الصوت</h3>
+              <Button
+                onClick={clearAudio}
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 ml-1" />
+                {t("clearAll")}
+              </Button>
+            </div>
+            
+            <div className="flex items-center space-x-3 space-x-reverse">
+              <Button
+                onClick={playPauseAudio}
+                variant="outline"
+                size="sm"
+              >
+                {isPlaying ? (
+                  <Pause className="w-4 h-4" />
+                ) : (
+                  <Play className="w-4 h-4" />
+                )}
+              </Button>
+              
+              <audio
+                ref={audioRef}
+                src={currentAudioSource}
+                onEnded={() => setIsPlaying(false)}
+                className="flex-1"
+                controls
+              />
+            </div>
+          </div>
         )}
 
         {/* Transcribe Button */}
-        {(audioBlob || uploadedFiles.length > 0) && (
-          <Button
-            onClick={handleTranscribe}
-            className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground py-3 rounded-xl shadow-md"
-            size="lg"
-          >
-            {uploadedFiles.length > 1 
-              ? `Process ${uploadedFiles.length} Files` 
-              : 'Transcribe & Classify'
-            }
-          </Button>
-        )}
+        <Button
+          onClick={handleTranscribe}
+          disabled={uploadedFiles.length === 0 && !audioBlob}
+          size="lg"
+          className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground py-4 text-lg font-medium rounded-xl shadow-glow"
+        >
+          <Mic className="w-6 h-6 ml-2" />
+          {t("transcribeNow")}
+        </Button>
       </CardContent>
     </Card>
   );
