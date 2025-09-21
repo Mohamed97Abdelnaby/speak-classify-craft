@@ -1,10 +1,14 @@
 import Navigation from "@/components/Navigation";
 import VoiceRecorder from "@/components/VoiceRecorder";
 import CategoryManager from "@/components/CategoryManager";
-import { Card, CardContent } from "@/components/ui/card";
-import { Mic, Settings, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Mic, Settings, Zap, FolderOpen, Upload } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Voice = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -75,6 +79,30 @@ const Voice = () => {
             <h2 className="text-2xl font-semibold text-foreground mb-4">Classification Categories</h2>
             <CategoryManager />
           </div>
+        </div>
+
+        {/* Batch Processing Option */}
+        <div className="mt-12 text-center">
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-center space-x-2">
+                <FolderOpen className="w-6 h-6 text-primary" />
+                <span>Need to Process Multiple Files?</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-6">
+                Upload and process multiple audio files simultaneously with our batch processing feature.
+              </p>
+              <Button 
+                onClick={() => navigate("/batch-upload")}
+                className="bg-gradient-primary hover:opacity-90 text-primary-foreground"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Try Batch Upload
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
