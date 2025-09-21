@@ -22,17 +22,18 @@ serve(async (req) => {
 
     // Get the form data from the request
     const formData = await req.formData();
-    const audioFile = formData.get('file') as File;
+    const file = formData.get('file');
     
-    if (!audioFile) {
-      throw new Error('No audio file provided');
+    // Validate that we received a proper File object
+    if (!(file instanceof File)) {
+      throw new Error('Uploaded file is invalid or missing. Expected File object.');
     }
 
-    console.log('Processing audio file:', audioFile.name, 'Size:', audioFile.size);
+    console.log('Processing audio file:', file.name, 'Size:', file.size);
 
     // Prepare form data for OpenAI API
     const openAIFormData = new FormData();
-    openAIFormData.append('file', audioFile);
+    openAIFormData.append('file', file, file.name); // Ensure it's attached as File with name
     openAIFormData.append('model', 'gpt-4o-transcribe');
 
     console.log('Sending request to OpenAI transcription API');
