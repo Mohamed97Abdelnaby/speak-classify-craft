@@ -182,7 +182,6 @@ const Review = () => {
                 <TableRow>
                   <TableHead className="text-right">اسم الملف</TableHead>
                   <TableHead className="text-right">النص المكتوب</TableHead>
-                  <TableHead className="text-right">التصنيف</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -194,32 +193,6 @@ const Review = () => {
                     <TableCell className="text-right max-w-2xl">
                       <div className="whitespace-pre-wrap text-sm leading-relaxed p-2">
                         {file.transcription || 'لا يوجد نص متاح'}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end space-x-2 space-x-reverse">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-sm"
-                          onClick={() => {
-                            // TODO: Add classification functionality
-                            toast({
-                              title: "التصنيف",
-                              description: "سيتم إضافة وظيفة التصنيف قريباً",
-                            });
-                          }}
-                        >
-                          صنف
-                        </Button>
-                        {file.classification?.confidence && (
-                          <Badge variant="outline" className="text-xs">
-                            {Math.round(file.classification.confidence * 100)}%
-                          </Badge>
-                        )}
-                        <Badge variant={file.classification?.predicted ? "default" : "secondary"}>
-                          {file.classification?.predicted || 'غير مصنف'}
-                        </Badge>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -235,6 +208,35 @@ const Review = () => {
             <Button onClick={() => window.location.reload()} variant="outline">
               Refresh Results
             </Button>
+          </div>
+        )}
+        
+        {/* Classification Actions */}
+        {completedFiles.length > 0 && (
+          <div className="mt-8 flex justify-center">
+            <div className="bg-muted/20 rounded-lg border p-6 min-w-[300px] text-center">
+              <h3 className="text-lg font-semibold mb-4 text-right">التصنيف</h3>
+              <div className="flex items-center justify-center gap-4">
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    toast({
+                      title: "التصنيف",
+                      description: "سيتم إضافة وظيفة التصنيف قريباً",
+                    });
+                  }}
+                  className="text-lg px-8"
+                >
+                  صنف
+                </Button>
+                <Badge variant="outline" className="text-lg px-3 py-1">
+                  86%
+                </Badge>
+                <Badge variant="secondary" className="text-sm">
+                  غير مصنف
+                </Badge>
+              </div>
+            </div>
           </div>
         )}
       </main>
