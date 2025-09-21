@@ -7,8 +7,10 @@ import { Label } from "@/components/ui/label";
 import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Clock, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const EmailOption = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -25,8 +27,8 @@ const EmailOption = () => {
   const handleSendByEmail = async () => {
     if (!email.trim()) {
       toast({
-        title: "Email required",
-        description: "Please enter your email address",
+        title: t("error"),
+        description: t("invalidEmail"),
         variant: "destructive",
       });
       return;
@@ -34,8 +36,8 @@ const EmailOption = () => {
 
     if (!validateEmail(email)) {
       toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address",
+        title: t("error"),
+        description: t("invalidEmail"),
         variant: "destructive",
       });
       return;
@@ -70,8 +72,8 @@ const EmailOption = () => {
       }
 
       toast({
-        title: "Processing started!",
-        description: `Results will be sent to ${email}`,
+        title: t("success"),
+        description: t("emailSent"),
       });
 
       // Show success message and option to return home
@@ -82,8 +84,8 @@ const EmailOption = () => {
     } catch (error) {
       console.error('Error sending email:', error);
       toast({
-        title: "Error",
-        description: "Failed to start email processing. Please try again.",
+        title: t("error"),
+        description: t("error"),
         variant: "destructive",
       });
     } finally {
@@ -110,33 +112,33 @@ const EmailOption = () => {
               </div>
             </div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Processing Options
+              {t("processingOptions")}
             </h1>
             <p className="text-lg text-muted-foreground max-w-lg mx-auto">
-              This may take a while. If you don't wish to wait, please enter your email and results will be sent to you.
+              {t("processingDesc")}
             </p>
           </div>
 
           {/* Email Option Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 gap-x-reverse">
                 <Mail className="h-5 w-5" />
-                Email Results (Optional)
+                {t("sendByEmail")}
               </CardTitle>
               <CardDescription>
-                Enter your email to receive results when processing is complete
+                {t("enterEmail")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               
               {/* Email Input */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">{t("enterEmail")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="your.email@example.com"
+                  placeholder={t("emailPlaceholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
@@ -150,8 +152,8 @@ const EmailOption = () => {
                   disabled={isLoading}
                   className="flex-1"
                 >
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Send by Email
+                  {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                  {t("sendByEmail")}
                 </Button>
                 
                 <Button
@@ -160,13 +162,10 @@ const EmailOption = () => {
                   disabled={isLoading}
                   className="flex-1"
                 >
-                  Continue without Email
+                  {t("continueWithoutEmail")}
                 </Button>
               </div>
               
-              <p className="text-sm text-muted-foreground text-center">
-                If you continue without email, the browser must remain open during processing
-              </p>
             </CardContent>
           </Card>
           

@@ -9,6 +9,7 @@ import Processing from "./pages/Processing";
 import Review from "./pages/Review";
 import Results from "./pages/Results";
 import NotFound from "./pages/NotFound";
+import "./i18n";
 
 const queryClient = new QueryClient();
 

@@ -7,8 +7,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowLeft, Download, RotateCcw } from "lucide-react";
 import { BatchFile } from "@/types/batch";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 const Review = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [files, setFiles] = useState<BatchFile[]>([]);
@@ -107,10 +109,10 @@ const Review = () => {
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-foreground">
-                Classification Results
+                {t("classificationResults")}
               </h1>
               <p className="text-muted-foreground">
-                Review and download your AI-powered call classifications
+                {t("resultsDesc")}
               </p>
             </div>
           </div>

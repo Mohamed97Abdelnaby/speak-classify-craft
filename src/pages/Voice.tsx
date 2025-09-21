@@ -3,8 +3,11 @@ import VoiceRecorder from "@/components/VoiceRecorder";
 import CategoryManager from "@/components/CategoryManager";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mic, Settings, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Voice = () => {
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -16,10 +19,10 @@ const Voice = () => {
             <Mic className="w-10 h-10 text-primary-foreground" />
           </div>
           <h1 className="text-4xl font-bold text-foreground mb-4">
-            Voice Transcription & Classification
+            {t("heroTitle")}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Upload or record audio files for automatic transcription and intelligent classification using advanced AI technology
+            {t("heroSubtitle")}
           </p>
         </div>
 
@@ -30,9 +33,9 @@ const Voice = () => {
               <div className="w-12 h-12 bg-gradient-secondary rounded-full flex items-center justify-center mx-auto mb-4">
                 <Mic className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-foreground mb-2">Record or Upload</h3>
+              <h3 className="font-semibold text-foreground mb-2">{t("recordOrUpload")}</h3>
               <p className="text-sm text-muted-foreground">
-                Capture audio directly or upload existing files
+                {t("recordUploadDesc")}
               </p>
             </CardContent>
           </Card>
@@ -42,9 +45,9 @@ const Voice = () => {
               <div className="w-12 h-12 bg-gradient-secondary rounded-full flex items-center justify-center mx-auto mb-4">
                 <Zap className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-foreground mb-2">AI Processing</h3>
+              <h3 className="font-semibold text-foreground mb-2">{t("aiProcessing")}</h3>
               <p className="text-sm text-muted-foreground">
-                Advanced transcription and classification
+                {t("aiProcessingDesc")}
               </p>
             </CardContent>
           </Card>
@@ -54,9 +57,9 @@ const Voice = () => {
               <div className="w-12 h-12 bg-gradient-secondary rounded-full flex items-center justify-center mx-auto mb-4">
                 <Settings className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-foreground mb-2">Custom Categories</h3>
+              <h3 className="font-semibold text-foreground mb-2">{t("customCategories")}</h3>
               <p className="text-sm text-muted-foreground">
-                Define your own classification categories
+                {t("customCategoriesDesc")}
               </p>
             </CardContent>
           </Card>
@@ -66,13 +69,13 @@ const Voice = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Voice Input Section */}
           <div>
-            <h2 className="text-2xl font-semibold text-foreground mb-4">Audio Input</h2>
+            <h2 className="text-2xl font-semibold text-foreground mb-4">{t("audioInput")}</h2>
             <VoiceRecorder />
           </div>
 
           {/* Category Management Section */}
           <div>
-            <h2 className="text-2xl font-semibold text-foreground mb-4">Classification Categories</h2>
+            <h2 className="text-2xl font-semibold text-foreground mb-4">{t("classificationCategories")}</h2>
             <CategoryManager />
           </div>
         </div>

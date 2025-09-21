@@ -2,19 +2,21 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { useTranslation } from "react-i18next";
 
 const Processing = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [currentMessage, setCurrentMessage] = useState(0);
   const batchId = searchParams.get('batch');
   
   const statusMessages = [
-    "Listening to calls…",
-    "Taking decision on calls…",
-    "Analyzing conversation patterns…",
-    "Processing audio content…",
-    "Applying AI classification…"
+    t("listeningToCalls"),
+    t("takingDecision"),
+    t("analyzingPatterns"),
+    t("processingContent"),
+    t("applyingClassification")
   ];
   
   useEffect(() => {

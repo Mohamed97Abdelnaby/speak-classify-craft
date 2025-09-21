@@ -16,8 +16,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { BatchFile } from "@/types/batch";
+import { useTranslation } from "react-i18next";
 
 const VoiceRecorder = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -31,14 +33,15 @@ const VoiceRecorder = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { toast } = useToast();
 
-  // Mock categories - replace with real data later
+  // Categories in Arabic
   const categories = [
-    "Meeting",
-    "Interview", 
-    "Lecture",
-    "Phone Call",
-    "Presentation",
-    "Other"
+    t("businessMeeting"),
+    t("interview"), 
+    t("lecture"),
+    t("phoneCall"),
+    t("personalNote"),
+    t("brainstorming"),
+    t("projectDiscussion")
   ];
 
   const startRecording = async () => {
@@ -81,8 +84,8 @@ const VoiceRecorder = () => {
 
     } catch (error) {
       toast({
-        title: "Recording Error",
-        description: "Could not access microphone. Please check permissions.",
+        title: t("error"),
+        description: t("microphoneError"),
         variant: "destructive",
       });
     }
@@ -108,8 +111,8 @@ const VoiceRecorder = () => {
     
     if (invalidFiles > 0) {
       toast({
-        title: "Invalid Files",
-        description: `${invalidFiles} non-audio files were skipped.`,
+        title: t("error"),
+        description: `${invalidFiles} ملف غير صوتي تم تجاهله.`,
         variant: "destructive",
       });
     }
@@ -127,8 +130,8 @@ const VoiceRecorder = () => {
     
     if (validFiles.length > 0) {
       toast({
-        title: "Files Added",
-        description: `Successfully added ${validFiles.length} audio file(s)`,
+        title: t("success"),
+        description: `تم إضافة ${validFiles.length} ملف صوتي بنجاح`,
       });
     }
   };
@@ -185,8 +188,8 @@ const VoiceRecorder = () => {
     if (!selectedCategory) return;
     setUploadedFiles(prev => prev.map(f => ({ ...f, category: selectedCategory })));
     toast({
-      title: "Category Assigned",
-      description: `All files assigned to "${selectedCategory}" category`,
+      title: t("success"),
+      description: `تم تعيين جميع الملفات لفئة "${selectedCategory}"`,
     });
   };
 
@@ -224,23 +227,23 @@ const VoiceRecorder = () => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
+        <CardTitle className="flex items-center space-x-2 space-x-reverse">
           <Mic className="w-5 h-5 text-primary" />
-          <span>Voice Input</span>
+          <span>{t("audioInput")}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Recording Section */}
         <div className="text-center space-y-4">
-          <div className="flex justify-center space-x-4">
+          <div className="flex justify-center space-x-4 space-x-reverse">
             {!isRecording ? (
               <Button
                 onClick={startRecording}
                 size="lg"
                 className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 py-4 rounded-xl shadow-glow"
               >
-                <Mic className="w-6 h-6 mr-2" />
-                Start Recording
+                <Mic className="w-6 h-6 ml-2" />
+                {t("startRecording")}
               </Button>
             ) : (
               <Button
@@ -249,8 +252,8 @@ const VoiceRecorder = () => {
                 variant="destructive"
                 className="px-8 py-4 rounded-xl"
               >
-                <Square className="w-6 h-6 mr-2" />
-                Stop Recording
+                <Square className="w-6 h-6 ml-2" />
+                {t("stopRecording")}
               </Button>
             )}
           </div>
@@ -260,7 +263,7 @@ const VoiceRecorder = () => {
               <div className="text-2xl font-mono text-destructive">
                 {formatTime(recordingTime)}
               </div>
-              <div className="text-sm text-muted-foreground">Recording...</div>
+              <div className="text-sm text-muted-foreground">{t("recording")}...</div>
             </div>
           )}
         </div>
@@ -271,7 +274,7 @@ const VoiceRecorder = () => {
             <span className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">Or</span>
+            <span className="bg-card px-2 text-muted-foreground">أو</span>
           </div>
         </div>
 
@@ -287,9 +290,9 @@ const VoiceRecorder = () => {
           onDrop={handleDrop}
         >
           <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="font-medium mb-2">Drop audio files here</h3>
+          <h3 className="font-medium mb-2">{t("dragDropFiles")}</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Or click to select multiple files
+            {t("supportedFormats")}
           </p>
           <Button
             onClick={() => fileInputRef.current?.click()}
@@ -297,7 +300,9 @@ const VoiceRecorder = () => {
             size="lg"
             className="px-8 py-3"
           >
-            Select Files
+            {t("uploadFiles")}
+          </Button>
+        </div>
           </Button>
           <input
             ref={fileInputRef}

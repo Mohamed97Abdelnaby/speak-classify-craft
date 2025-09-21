@@ -12,17 +12,19 @@ import {
   Tags
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 const CategoryManager = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [categories, setCategories] = useState([
-    "Business Meeting",
-    "Personal Note",
-    "Interview",
-    "Lecture",
-    "Phone Call",
-    "Brainstorming",
-    "Project Discussion"
+    t("businessMeeting"),
+    t("personalNote"),
+    t("interview"),
+    t("lecture"),
+    t("phoneCall"),
+    t("brainstorming"),
+    t("projectDiscussion")
   ]);
   const [newCategory, setNewCategory] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -33,13 +35,13 @@ const CategoryManager = () => {
       setCategories([...categories, newCategory.trim()]);
       setNewCategory("");
       toast({
-        title: "Category Added",
-        description: `"${newCategory.trim()}" has been added to your categories.`,
+        title: t("success"),
+        description: t("categoryAdded"),
       });
     } else if (categories.includes(newCategory.trim())) {
       toast({
-        title: "Category Exists",
-        description: "This category already exists.",
+        title: t("warning"),
+        description: t("categoryExists"),
         variant: "destructive",
       });
     }
@@ -49,8 +51,8 @@ const CategoryManager = () => {
     const categoryName = categories[index];
     setCategories(categories.filter((_, i) => i !== index));
     toast({
-      title: "Category Deleted",
-      description: `"${categoryName}" has been removed.`,
+      title: t("success"),
+      description: t("categoryDeleted"),
     });
   };
 
@@ -67,8 +69,8 @@ const CategoryManager = () => {
       setEditingIndex(null);
       setEditingValue("");
       toast({
-        title: "Category Updated",
-        description: "Category has been successfully updated.",
+        title: t("success"),
+        description: t("categoryUpdated"),
       });
     }
   };
@@ -81,16 +83,16 @@ const CategoryManager = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
+        <CardTitle className="flex items-center space-x-2 space-x-reverse">
           <Tags className="w-5 h-5 text-primary" />
-          <span>Manage Categories</span>
+          <span>{t("classificationCategories")}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Add New Category */}
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 space-x-reverse">
           <Input
-            placeholder="Enter new category name..."
+            placeholder={t("addNewCategory")}
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && addCategory()}
@@ -101,15 +103,15 @@ const CategoryManager = () => {
             disabled={!newCategory.trim()}
             className="bg-gradient-primary hover:opacity-90 text-primary-foreground"
           >
-            <Plus className="w-4 h-4 mr-1" />
-            Add
+            <Plus className="w-4 h-4 ml-1" />
+            {t("addCategory")}
           </Button>
         </div>
 
         {/* Categories List */}
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground">
-            Current Categories ({categories.length})
+            الفئات الحالية ({categories.length})
           </h3>
           <div className="grid gap-3">
             {categories.map((category, index) => (
@@ -118,7 +120,7 @@ const CategoryManager = () => {
                 className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-card-hover transition-colors"
               >
                 {editingIndex === index ? (
-                  <div className="flex items-center space-x-2 flex-1">
+                  <div className="flex items-center space-x-2 space-x-reverse flex-1">
                     <Input
                       value={editingValue}
                       onChange={(e) => setEditingValue(e.target.value)}
@@ -143,12 +145,12 @@ const CategoryManager = () => {
                   </div>
                 ) : (
                   <>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 space-x-reverse">
                       <Badge variant="secondary" className="text-sm">
                         {category}
                       </Badge>
                     </div>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1 space-x-reverse">
                       <Button
                         onClick={() => startEditing(index)}
                         size="sm"
@@ -175,8 +177,7 @@ const CategoryManager = () => {
         {categories.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <Tags className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>No categories defined yet.</p>
-            <p className="text-sm">Add your first category above to get started.</p>
+            <p>{t("noCategories")}</p>
           </div>
         )}
       </CardContent>
