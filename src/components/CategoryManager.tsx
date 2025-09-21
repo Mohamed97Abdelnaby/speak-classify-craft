@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 const CategoryManager = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [categories, setCategories] = useState([t("businessMeeting")]);
+  const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState("");
