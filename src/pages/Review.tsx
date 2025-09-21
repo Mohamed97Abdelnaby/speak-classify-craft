@@ -109,29 +109,135 @@ const Review = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="bg-muted/20 rounded-lg border p-6 min-w-[300px] text-center">
-        <div className="flex items-center justify-center gap-4">
-          <Button
-            size="lg"
-            onClick={() => {
-              toast({
-                title: "التصنيف",
-                description: "سيتم إضافة وظيفة التصنيف قريباً",
-              });
-            }}
-            className="text-lg px-8"
-          >
-            صنف
-          </Button>
-          <Badge variant="outline" className="text-lg px-3 py-1">
-            86%
-          </Badge>
-          <Badge variant="secondary" className="text-sm">
-            غير مصنف
-          </Badge>
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      <main className="max-w-6xl mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4 space-x-reverse">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/")}
+              className="flex items-center space-x-2 space-x-reverse"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>{t("backToHome")}</span>
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                {t("classificationResults")}
+              </h1>
+              <p className="text-muted-foreground">
+                {t("resultsDesc")}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-3 space-x-reverse">
+            <Button
+              onClick={downloadCSV}
+              variant="outline"
+              className="flex items-center space-x-2 space-x-reverse"
+              disabled={completedFiles.length === 0}
+            >
+              <Download className="w-4 h-4" />
+              <span>{t("downloadResults")}</span>
+            </Button>
+            <Button
+              onClick={() => navigate("/")}
+              className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>{t("startOver")}</span>
+            </Button>
+          </div>
         </div>
-      </div>
+
+        {/* Results Summary */}
+        <div className="mb-8 p-4 bg-muted/20 rounded-lg border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Classification Complete</p>
+              <p className="text-2xl font-bold text-primary">{completedFiles.length}</p>
+              <p className="text-sm text-muted-foreground">
+                {completedFiles.length === 1 ? 'Call classified' : 'Calls classified'}
+              </p>
+            </div>
+            {completedFiles.length > 0 && (
+              <Badge variant="default" className="text-sm">
+                Ready for Export
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        {/* Results Table */}
+        {completedFiles.length > 0 ? (
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-right">اسم الملف</TableHead>
+                  <TableHead className="text-right">النص المكتوب</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {completedFiles.map((file) => (
+                  <TableRow key={file.id}>
+                    <TableCell className="font-medium text-right">
+                      {file.name}
+                    </TableCell>
+                    <TableCell className="text-right max-w-2xl">
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed p-2">
+                        {file.transcription || 'لا يوجد نص متاح'}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">
+              No completed classifications found. Processing may still be in progress.
+            </p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Refresh Results
+            </Button>
+          </div>
+        )}
+        
+        {/* Classification Actions */}
+        {completedFiles.length > 0 && (
+          <div className="mt-8 flex justify-center">
+            <div className="bg-muted/20 rounded-lg border p-6 min-w-[300px] text-center">
+              <div className="flex items-center justify-center gap-4">
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    toast({
+                      title: "التصنيف",
+                      description: "سيتم إضافة وظيفة التصنيف قريباً",
+                    });
+                  }}
+                  className="text-lg px-8"
+                >
+                  صنف
+                </Button>
+                <Badge variant="outline" className="text-lg px-3 py-1">
+                  86%
+                </Badge>
+                <Badge variant="secondary" className="text-sm">
+                  غير مصنف
+                </Badge>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 };
