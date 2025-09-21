@@ -23,29 +23,28 @@ const Review = () => {
       return;
     }
 
-    // Load batch data from localStorage
-    const batchDataString = localStorage.getItem(`batch-${batchId}`);
-    if (batchDataString) {
+    // Load batch data from storage
+    const loadBatchData = async () => {
       try {
-        // Parse the serialized batch data
-        const serializedBatchData = JSON.parse(batchDataString);
+        const { getBatchData } = await import('@/utils/indexedDbStorage');
+        const { deserializeBatchData } = await import('@/utils/fileSerializer');
         
-        // Import deserialization utility and convert back to BatchData
-        import('@/utils/fileSerializer').then(({ deserializeBatchData }) => {
+        const serializedBatchData = await getBatchData(batchId);
+        
+        if (serializedBatchData) {
           const batchData = deserializeBatchData(serializedBatchData);
           setFiles(batchData.files || []);
-        }).catch(error => {
-          console.error('Failed to deserialize batch data:', error);
+        } else {
+          console.error('No batch data found for:', batchId);
           navigate("/");
-        });
+        }
       } catch (error) {
-        console.error('Failed to parse batch data:', error);
+        console.error('Failed to load batch data:', error);
         navigate("/");
       }
-    } else {
-      // Redirect if no batch data found
-      navigate("/");
-    }
+    };
+    
+    loadBatchData();
   }, [batchId, navigate]);
 
   const downloadCSV = () => {

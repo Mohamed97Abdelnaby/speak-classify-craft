@@ -47,10 +47,15 @@ const Processing = () => {
       // Update status to transcribing
       updatedFiles[i] = { ...file, status: 'transcribing' };
       
-      // Update localStorage with current progress - serialize the updated batch
-      const progressBatch = { ...batchData, files: updatedFiles };
-      const serializedProgress = await serializeBatchData(progressBatch);
-      localStorage.setItem(`batch-${batchId}`, JSON.stringify(serializedProgress));
+      // Update progress storage - serialize the updated batch
+      try {
+        const { setBatchData } = await import('@/utils/indexedDbStorage');
+        const progressBatch = { ...batchData, files: updatedFiles };
+        const serializedProgress = await serializeBatchData(progressBatch);
+        await setBatchData(batchId!, serializedProgress);
+      } catch (storageError) {
+        console.error('Failed to update progress storage:', storageError);
+      }
       
       try {
         // Transcribe the audio file
@@ -84,10 +89,15 @@ const Processing = () => {
         updatedFiles[i] = { ...file, status: 'completed' };
       }
       
-      // Update localStorage after each file - serialize the final batch
-      const finalBatch = { ...batchData, files: updatedFiles };
-      const serializedFinal = await serializeBatchData(finalBatch);
-      localStorage.setItem(`batch-${batchId}`, JSON.stringify(serializedFinal));
+      // Update storage after each file - serialize the final batch
+      try {
+        const { setBatchData } = await import('@/utils/indexedDbStorage');
+        const finalBatch = { ...batchData, files: updatedFiles };
+        const serializedFinal = await serializeBatchData(finalBatch);
+        await setBatchData(batchId!, serializedFinal);
+      } catch (storageError) {
+        console.error('Failed to update storage:', storageError);
+      }
     }
 
     // Navigate to review page when all files are processed
@@ -112,36 +122,41 @@ const Processing = () => {
       return;
     }
 
-    const batchDataString = localStorage.getItem(`batch-${batchId}`);
-    if (!batchDataString) {
-      navigate("/");
-      return;
-    }
-
-    try {
-      // Parse the serialized batch data
-      const serializedBatchData = JSON.parse(batchDataString);
-      
-      // Import deserialization utility
-      import('@/utils/fileSerializer').then(({ deserializeBatchData }) => {
-        const batchData: BatchData = deserializeBatchData(serializedBatchData);
-        setTotalFiles(batchData.files.length);
+    // Load batch data from storage
+    const loadBatchData = async () => {
+      try {
+        const { getBatchData } = await import('@/utils/indexedDbStorage');
+        const { deserializeBatchData } = await import('@/utils/fileSerializer');
         
-        // Start processing audio files
-        processAudioFiles(batchData);
-      }).catch(error => {
-        console.error('Failed to deserialize batch data:', error);
+        const serializedBatchData = await getBatchData(batchId);
+        
+        if (serializedBatchData) {
+          const batchData = deserializeBatchData(serializedBatchData);
+          setTotalFiles(batchData.files.length);
+          
+          // Start processing audio files
+          processAudioFiles(batchData);
+        } else {
+          console.error('No batch data found for:', batchId);
+          toast({
+            title: t("error"),
+            description: "Failed to load batch data",
+            variant: "destructive",
+          });
+          navigate("/");
+        }
+      } catch (error) {
+        console.error('Failed to load batch data:', error);
         toast({
           title: t("error"),
-          description: "Failed to load batch data",
+          description: "Failed to load batch data", 
           variant: "destructive",
         });
         navigate("/");
-      });
-    } catch (error) {
-      console.error('Failed to parse batch data:', error);
-      navigate("/");
-    }
+      }
+    };
+    
+    loadBatchData();
   }, [batchId, navigate, processAudioFiles, toast, t]);
 
 

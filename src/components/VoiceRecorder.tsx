@@ -208,12 +208,13 @@ const VoiceRecorder = () => {
       
       // Import serialization utilities
       const { serializeBatchData } = await import('@/utils/fileSerializer');
+      const { setBatchData } = await import('@/utils/indexedDbStorage');
       
-      // Serialize batch data for localStorage storage
+      // Serialize batch data for storage
       const serializedBatchData = await serializeBatchData(batchData);
       
-      // Store serialized data in localStorage
-      localStorage.setItem(`batch-${batchId}`, JSON.stringify(serializedBatchData));
+      // Store serialized data using IndexedDB (with localStorage fallback)
+      await setBatchData(batchId, serializedBatchData);
       
       // Navigate to email option page
       navigate(`/email-option?batch=${batchId}`);
