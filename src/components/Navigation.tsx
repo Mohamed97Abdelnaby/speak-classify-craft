@@ -4,30 +4,19 @@ import {
   History, 
   Settings, 
   Home,
-  Tags,
-  FolderOpen
+  Tags
 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const Navigation = () => {
   const [activeTab, setActiveTab] = useState("home");
-  const navigate = useNavigate();
 
   const navItems = [
-    { id: "home", label: "Dashboard", icon: Home, path: "/" },
-    { id: "batch", label: "Batch Upload", icon: FolderOpen, path: "/batch-upload" },
+    { id: "home", label: "Dashboard", icon: Home },
     { id: "categories", label: "Categories", icon: Tags },
     { id: "history", label: "History", icon: History },
     { id: "settings", label: "Settings", icon: Settings },
   ];
-
-  const handleNavClick = (item: typeof navItems[0]) => {
-    setActiveTab(item.id);
-    if (item.path) {
-      navigate(item.path);
-    }
-  };
 
   return (
     <nav className="bg-card border-b border-border px-6 py-4">
@@ -50,7 +39,7 @@ const Navigation = () => {
                 key={item.id}
                 variant={activeTab === item.id ? "default" : "ghost"}
                 size="sm"
-                onClick={() => handleNavClick(item)}
+                onClick={() => setActiveTab(item.id)}
                 className="flex items-center space-x-2"
               >
                 <Icon className="w-4 h-4" />
