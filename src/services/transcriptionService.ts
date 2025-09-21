@@ -8,7 +8,13 @@ export interface TranscriptionResult {
 
 export const transcribeAudio = async (audioFile: File): Promise<TranscriptionResult> => {
   try {
-    console.log('Transcribing audio file:', audioFile.name);
+    console.log('Transcribing audio file:', {
+      name: audioFile.name,
+      size: audioFile.size,
+      type: audioFile.type,
+      lastModified: audioFile.lastModified,
+      constructor: audioFile.constructor.name
+    });
     
     // Prepare form data
     const formData = new FormData();

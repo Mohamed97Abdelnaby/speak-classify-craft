@@ -29,12 +29,24 @@ serve(async (req) => {
       throw new Error('Uploaded file is invalid or missing. Expected File object.');
     }
 
-    console.log('Processing audio file:', file.name, 'Size:', file.size);
+    console.log('Processing audio file:', {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      lastModified: file.lastModified
+    });
+
+    // Validate file type
+    if (!file.type.startsWith('audio/')) {
+      console.warn('File type is not audio:', file.type);
+    }
 
     // Prepare form data for OpenAI API
     const openAIFormData = new FormData();
-    openAIFormData.append('file', file, file.name); // Ensure it's attached as File with name
+    openAIFormData.append('file', file, file.name);
     openAIFormData.append('model', 'gpt-4o-transcribe');
+    
+    console.log('FormData prepared for OpenAI API');
 
     console.log('Sending request to OpenAI transcription API');
 
@@ -49,7 +61,12 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
+      console.error('OpenAI API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        body: errorText
+      });
       throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 

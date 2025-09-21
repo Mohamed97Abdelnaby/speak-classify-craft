@@ -63,6 +63,8 @@ export const fileToSerialized = async (file: File): Promise<SerializedFile> => {
  * Converts a serialized file back to a File object
  */
 export const serializedToFile = (serialized: SerializedFile): File => {
+  console.log('Deserializing file:', serialized.name, 'Type:', serialized.type, 'Size:', serialized.size);
+  
   // Convert base64 back to binary data
   const binaryString = atob(serialized.data);
   const bytes = new Uint8Array(binaryString.length);
@@ -75,6 +77,14 @@ export const serializedToFile = (serialized: SerializedFile): File => {
   const file = new File([bytes], serialized.name, {
     type: serialized.type,
     lastModified: serialized.lastModified
+  });
+  
+  console.log('File reconstructed:', {
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    constructor: file.constructor.name,
+    isValidFile: file instanceof File
   });
   
   return file;

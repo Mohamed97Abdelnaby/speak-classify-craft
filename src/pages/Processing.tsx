@@ -35,6 +35,14 @@ const Processing = () => {
     for (let i = 0; i < updatedFiles.length; i++) {
       const file = updatedFiles[i];
       console.log(`Processing file ${i + 1}/${updatedFiles.length}: ${file.name}`);
+      console.log('File object before transcription:', {
+        name: file.file.name,
+        size: file.file.size,
+        type: file.file.type,
+        constructor: file.file.constructor.name,
+        isValidFile: file.file instanceof File,
+        lastModified: file.file.lastModified
+      });
       
       // Update status to transcribing
       updatedFiles[i] = { ...file, status: 'transcribing' };
@@ -46,9 +54,12 @@ const Processing = () => {
       
       try {
         // Transcribe the audio file
+        console.log('Calling transcribeAudio with file:', file.file.name);
         const result = await transcribeAudio(file.file);
+        console.log(`Transcription result for ${file.name}:`, result);
         
         if (result.success && result.text) {
+          console.log(`Transcription successful for ${file.name}:`, result.text.substring(0, 100) + '...');
           // Update file with transcription and mark as completed
           updatedFiles[i] = { 
             ...file, 
@@ -63,14 +74,14 @@ const Processing = () => {
           completedCount++;
           setProcessedCount(completedCount);
         } else {
+          console.error(`Transcription failed for ${file.name}:`, result.error);
           // Mark as completed but with no transcription (so it won't show in results)
           updatedFiles[i] = { ...file, status: 'completed' };
-          console.error(`Transcription failed for ${file.name}:`, result.error);
         }
       } catch (error) {
+        console.error(`Error processing ${file.name}:`, error);
         // Mark as completed but with no transcription (so it won't show in results)
         updatedFiles[i] = { ...file, status: 'completed' };
-        console.error(`Error processing ${file.name}:`, error);
       }
       
       // Update localStorage after each file - serialize the final batch
