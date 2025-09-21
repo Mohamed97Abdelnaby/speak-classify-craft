@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -25,7 +25,7 @@ const Processing = () => {
     t("applyingClassification")
   ];
 
-  const processAudioFiles = async (batchData: BatchData) => {
+  const processAudioFiles = useCallback(async (batchData: BatchData) => {
     const updatedFiles = [...batchData.files];
     let completedCount = 0;
 
@@ -76,24 +76,9 @@ const Processing = () => {
 
     // Navigate to review page when all files are processed
     navigate(`/review?batch=${batchId}`);
-  };
+  }, [batchId, navigate, setProcessedCount]);
   
   useEffect(() => {
-    // Check if batch exists and start processing
-    if (batchId) {
-      const batchDataString = localStorage.getItem(`batch-${batchId}`);
-      if (!batchDataString) {
-        navigate("/");
-        return;
-      }
-
-      const batchData: BatchData = JSON.parse(batchDataString);
-      setTotalFiles(batchData.files.length);
-      
-      // Start processing audio files
-      processAudioFiles(batchData);
-    }
-
     // Rotate messages every 3 seconds
     const messageInterval = setInterval(() => {
       setCurrentMessage(prev => (prev + 1) % statusMessages.length);
@@ -102,7 +87,27 @@ const Processing = () => {
     return () => {
       clearInterval(messageInterval);
     };
-  }, [navigate, batchId]);
+  }, [statusMessages.length]);
+
+  useEffect(() => {
+    // Check if batch exists and start processing
+    if (!batchId) {
+      navigate("/");
+      return;
+    }
+
+    const batchDataString = localStorage.getItem(`batch-${batchId}`);
+    if (!batchDataString) {
+      navigate("/");
+      return;
+    }
+
+    const batchData: BatchData = JSON.parse(batchDataString);
+    setTotalFiles(batchData.files.length);
+    
+    // Start processing audio files
+    processAudioFiles(batchData);
+  }, [batchId, navigate, processAudioFiles]);
 
 
   return (
