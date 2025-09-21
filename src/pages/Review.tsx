@@ -180,32 +180,46 @@ const Review = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t("fileName")}</TableHead>
-                  <TableHead>{t("transcribedText")}</TableHead>
-                  <TableHead>{t("classification")}</TableHead>
+                  <TableHead className="text-right">اسم الملف</TableHead>
+                  <TableHead className="text-right">النص المكتوب</TableHead>
+                  <TableHead className="text-right">التصنيف</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {completedFiles.map((file) => (
                   <TableRow key={file.id}>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium text-right">
                       {file.name}
                     </TableCell>
-                    <TableCell className="max-w-md">
-                      <div className="truncate" title={file.transcription}>
+                    <TableCell className="text-right max-w-2xl">
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed p-2">
                         {file.transcription || 'لا يوجد نص متاح'}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="default">
-                          {file.classification?.predicted || 'غير مصنف'}
-                        </Badge>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end space-x-2 space-x-reverse">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-sm"
+                          onClick={() => {
+                            // TODO: Add classification functionality
+                            toast({
+                              title: "التصنيف",
+                              description: "سيتم إضافة وظيفة التصنيف قريباً",
+                            });
+                          }}
+                        >
+                          صنف
+                        </Button>
                         {file.classification?.confidence && (
                           <Badge variant="outline" className="text-xs">
                             {Math.round(file.classification.confidence * 100)}%
                           </Badge>
                         )}
+                        <Badge variant={file.classification?.predicted ? "default" : "secondary"}>
+                          {file.classification?.predicted || 'غير مصنف'}
+                        </Badge>
                       </div>
                     </TableCell>
                   </TableRow>
