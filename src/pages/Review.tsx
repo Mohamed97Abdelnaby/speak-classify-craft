@@ -215,7 +215,6 @@ const Review = () => {
         {completedFiles.length > 0 && (
           <div className="mt-8 flex justify-center">
             <div className="bg-muted/20 rounded-lg border p-6 min-w-[300px] text-center">
-              <h3 className="text-lg font-semibold mb-4 text-right">التصنيف</h3>
               <div className="flex items-center justify-center gap-4">
                 <Button
                   size="lg"
