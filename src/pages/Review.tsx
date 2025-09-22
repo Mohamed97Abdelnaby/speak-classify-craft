@@ -124,6 +124,9 @@ const Review = () => {
         description: "تم تصنيف المحادثات بنجاح",
       });
 
+      // Navigate to results page
+      navigate(`/results?batch=${batchId}`);
+
     } catch (error) {
       console.error('Classification error:', error);
       toast({
