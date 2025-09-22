@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { BatchFile } from "@/types/batch";
 
 interface EmailResultsDialogProps {
@@ -13,24 +14,25 @@ interface EmailResultsDialogProps {
 }
 
 const EmailResultsDialog = ({ files }: EmailResultsDialogProps) => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
-  const [subject, setSubject] = useState("Transcription and Classification Results");
+  const [subject, setSubject] = useState(t("defaultEmailSubject"));
   const [isOpen, setIsOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
 
   const generateEmailContent = () => {
     const completedFiles = files.filter(f => f.status === 'completed');
-    let content = `Transcription and Classification Results\n\n`;
-    content += `Total files processed: ${completedFiles.length}\n`;
-    content += `Processing date: ${new Date().toLocaleDateString()}\n\n`;
+    let content = `${t("transcriptionClassificationResults")}\n\n`;
+    content += `${t("totalFilesProcessed")} ${completedFiles.length}\n`;
+    content += `${t("processingDate")} ${new Date().toLocaleDateString()}\n\n`;
     
     completedFiles.forEach((file, index) => {
-      content += `--- File ${index + 1}: ${file.name} ---\n`;
-      content += `Summary: ${file.summary || 'No summary available'}\n`;
-      content += `Category: ${file.classification?.verified || file.classification?.predicted || 'Unclassified'}\n`;
+      content += `--- ${t("fileNumber")} ${index + 1}: ${file.name} ---\n`;
+      content += `${t("summaryLabel")} ${file.summary || t("noSummaryAvailable")}\n`;
+      content += `${t("categoryLabel")} ${file.classification?.verified || file.classification?.predicted || t("unclassified")}\n`;
       if (file.classification?.confidence) {
-        content += `Confidence: ${(file.classification.confidence * 100).toFixed(1)}%\n`;
+        content += `${t("confidenceLabel")} ${(file.classification.confidence * 100).toFixed(1)}%\n`;
       }
       content += `\n`;
     });
@@ -41,8 +43,8 @@ const EmailResultsDialog = ({ files }: EmailResultsDialogProps) => {
   const handleSendEmail = async () => {
     if (!email.trim()) {
       toast({
-        title: "Email Required",
-        description: "Please enter an email address",
+        title: t("emailRequired"),
+        description: t("pleaseEnterEmail"),
         variant: "destructive",
       });
       return;
@@ -55,16 +57,16 @@ const EmailResultsDialog = ({ files }: EmailResultsDialogProps) => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       toast({
-        title: "Results Sent",
-        description: `Results have been sent to ${email}`,
+        title: t("resultsSent"),
+        description: `${t("resultsSentTo")} ${email}`,
       });
       
       setIsOpen(false);
       setEmail("");
     } catch (error) {
       toast({
-        title: "Send Failed",
-        description: "Failed to send email. Please try again.",
+        title: t("sendFailed"),
+        description: t("failedToSendEmail"),
         variant: "destructive",
       });
     } finally {
@@ -75,28 +77,28 @@ const EmailResultsDialog = ({ files }: EmailResultsDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center space-x-2">
+        <Button variant="outline" className="flex items-center space-x-2 space-x-reverse">
           <Mail className="w-4 h-4" />
-          <span>Email Results</span>
+          <span>{t("emailResults")}</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Email Results</DialogTitle>
+          <DialogTitle>{t("emailResults")}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor="email">{t("emailAddress")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="Enter email address"
+              placeholder={t("enterEmailAddress")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="subject">Subject</Label>
+            <Label htmlFor="subject">{t("subject")}</Label>
             <Input
               id="subject"
               value={subject}
@@ -104,7 +106,7 @@ const EmailResultsDialog = ({ files }: EmailResultsDialogProps) => {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="preview">Email Preview</Label>
+            <Label htmlFor="preview">{t("emailPreview")}</Label>
             <Textarea
               id="preview"
               value={generateEmailContent()}
@@ -113,17 +115,17 @@ const EmailResultsDialog = ({ files }: EmailResultsDialogProps) => {
             />
           </div>
         </div>
-        <div className="flex justify-end space-x-2">
+        <div className="flex justify-end space-x-2 space-x-reverse">
           <Button variant="outline" onClick={() => setIsOpen(false)}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button onClick={handleSendEmail} disabled={isSending}>
             {isSending ? (
-              <>Sending...</>
+              <>{t("sending")}</>
             ) : (
               <>
                 <Send className="w-4 h-4 mr-2" />
-                Send Email
+                {t("sendEmail")}
               </>
             )}
           </Button>
