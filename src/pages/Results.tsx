@@ -90,8 +90,17 @@ const Results = () => {
     console.log("Share results");
   };
   
-  // Mock categories for verification
-  const categories = ["Meeting", "Interview", "Lecture", "Phone Call", "Presentation", "Other"];
+  // Debt collection customer behavior categories
+  const categories = [
+    "عميل متجاوب",
+    "عميل واعد", 
+    "عميل مماطل",
+    "عميل يستخدم التلاعب العاطفي والهجوم",
+    "عميل من رافض لمتجاوب",
+    "عميل غاضب ويتلفظ مسيء",
+    "عميل رافض",
+    "عميل لا يستطيع"
+  ];
   
   // If no batch data, show single file results (legacy)
   if (!batchId || files.length === 0) {
@@ -279,65 +288,69 @@ const Results = () => {
                 {/* File Info */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">File Information</CardTitle>
+                    <CardTitle className="text-lg">معلومات الملف</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div>
-                      <p className="text-sm font-medium">File Name</p>
+                      <p className="text-sm font-medium">اسم الملف</p>
                       <p className="text-sm text-muted-foreground">{file.name}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Status</p>
-                      <Badge variant="default">Completed</Badge>
+                      <p className="text-sm font-medium">الحالة</p>
+                      <Badge variant="default">مكتمل</Badge>
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Original Category</p>
-                      <Badge variant="outline">{file.category || 'Not assigned'}</Badge>
+                      <p className="text-sm font-medium">التصنيف الأصلي</p>
+                      <Badge variant="outline">{file.category || 'غير محدد'}</Badge>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Summary */}
+                {/* Transcription */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">AI Summary</CardTitle>
+                    <CardTitle className="text-lg">النص المستخرج</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {file.summary || 'No summary available'}
-                    </p>
+                    <div className="p-4 bg-muted/50 rounded-md max-h-40 overflow-y-auto">
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap" dir="rtl">
+                        {file.transcription || 'لا يوجد نص مستخرج'}
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
 
                 {/* Classification & Verification */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Classification</CardTitle>
+                    <CardTitle className="text-lg">التصنيف</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <p className="text-sm font-medium mb-2">AI Prediction</p>
+                      <p className="text-sm font-medium mb-2">تصنيف الذكي الاصطناعي</p>
                       <div className="flex items-center space-x-2">
-                        <Badge variant="secondary">
-                          {file.classification?.predicted || 'Unknown'}
+                        <Badge 
+                          variant="secondary"
+                          className="bg-primary/10 text-primary border-primary/20"
+                        >
+                          {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {file.classification?.confidence 
-                            ? `${(file.classification.confidence * 100).toFixed(1)}%`
-                            : ''
-                          }
-                        </span>
+                        {file.classification?.classificationTimestamp && (
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(file.classification.classificationTimestamp).toLocaleString('ar-SA')}
+                          </span>
+                        )}
                       </div>
                     </div>
                     
                     <div>
-                      <p className="text-sm font-medium mb-2">Verify Category</p>
+                      <p className="text-sm font-medium mb-2">تأكيد التصنيف</p>
                       <Select
-                        value={file.classification?.verified || file.classification?.predicted || ""}
+                        value={file.classification?.verified || file.classification?.aiClassification || file.classification?.predicted || ""}
                         onValueChange={(value) => updateFileVerification(file.id, value)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder="اختر التصنيف" />
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map(category => (
@@ -354,7 +367,7 @@ const Results = () => {
                         <div className="flex items-center space-x-2">
                           <CheckCircle className="w-4 h-4 text-success" />
                           <span className="text-sm font-medium text-success">
-                            Verified as "{file.classification.verified}"
+                            تم التأكيد كـ "{file.classification.verified}"
                           </span>
                         </div>
                       </div>
