@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { getUserCategories } from "@/utils/categoryStorage";
+import { supabase } from "@/integrations/supabase/client";
 
 const TranscriptionResults = () => {
   const { toast } = useToast();
@@ -76,8 +77,12 @@ const TranscriptionResults = () => {
     });
   };
 
-  const handleSatisfactionResponse = (response: 'satisfied' | 'not-satisfied') => {
+  const handleSatisfactionResponse = async (response: 'satisfied' | 'not-satisfied') => {
     setSatisfactionResponse(response);
+
+    // Note: This component shows mock data and doesn't have file info
+    // Database saving will be handled when this component receives real data
+    console.log('Satisfaction response:', response);
   };
 
   return (

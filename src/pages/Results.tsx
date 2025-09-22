@@ -15,6 +15,7 @@ import { getBatchData } from "@/utils/indexedDbStorage";
 import { deserializeBatchData } from "@/utils/fileSerializer";
 import { useTranslation } from "react-i18next";
 import { getUserCategories } from "@/utils/categoryStorage";
+import { updateSatisfactionResponse, updateVerifiedClassification } from "@/services/transcriptionStorageService";
 
 const Results = () => {
   const { t } = useTranslation();
@@ -57,7 +58,7 @@ const Results = () => {
     loadBatchData();
   }, [batchId, navigate]);
 
-  const updateFileVerification = (fileId: string, verifiedCategory: string) => {
+  const updateFileVerification = async (fileId: string, verifiedCategory: string) => {
     setFiles(prev => prev.map(file => 
       file.id === fileId 
         ? {
@@ -89,6 +90,20 @@ const Results = () => {
       };
       localStorage.setItem(`batch-${batchId}`, JSON.stringify(batchData));
     }
+
+    // Save verified classification to database using the service function
+    const result = await updateVerifiedClassification(fileId, verifiedCategory);
+    
+    if (!result.success) {
+      console.error('Error saving verified classification:', result.error);
+      toast({
+        title: "خطأ",
+        description: "فشل في حفظ التصنيف المؤكد",
+        variant: "destructive"
+      });
+    } else {
+      console.log('Verified classification saved successfully');
+    }
     
     toast({
       title: t("verificationUpdated"),
@@ -110,11 +125,25 @@ const Results = () => {
     console.log("Share results");
   };
 
-  const handleSatisfactionResponse = (fileId: string, response: 'satisfied' | 'not-satisfied') => {
+  const handleSatisfactionResponse = async (fileId: string, response: 'satisfied' | 'not-satisfied') => {
     setSatisfactionAnswers(prev => ({
       ...prev,
       [fileId]: response
     }));
+
+    // Save satisfaction response to database using the service function
+    const result = await updateSatisfactionResponse(fileId, response);
+    
+    if (!result.success) {
+      console.error('Error saving satisfaction response:', result.error);
+      toast({
+        title: "خطأ",
+        description: "فشل في حفظ رد الرضا",
+        variant: "destructive"
+      });
+    } else {
+      console.log('Satisfaction response saved successfully');
+    }
   };
   
   // If no batch data, show single file results (legacy)

@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      transcription_results: {
+        Row: {
+          ai_classification: string
+          ai_confidence: number | null
+          audio_duration: number | null
+          batch_id: string | null
+          created_at: string
+          file_id: string | null
+          file_name: string
+          file_size: number | null
+          id: string
+          processing_duration: number | null
+          token_count: number | null
+          transcription_text: string
+          updated_at: string
+          user_satisfaction: string | null
+          verified_classification: string | null
+        }
+        Insert: {
+          ai_classification: string
+          ai_confidence?: number | null
+          audio_duration?: number | null
+          batch_id?: string | null
+          created_at?: string
+          file_id?: string | null
+          file_name: string
+          file_size?: number | null
+          id?: string
+          processing_duration?: number | null
+          token_count?: number | null
+          transcription_text: string
+          updated_at?: string
+          user_satisfaction?: string | null
+          verified_classification?: string | null
+        }
+        Update: {
+          ai_classification?: string
+          ai_confidence?: number | null
+          audio_duration?: number | null
+          batch_id?: string | null
+          created_at?: string
+          file_id?: string | null
+          file_name?: string
+          file_size?: number | null
+          id?: string
+          processing_duration?: number | null
+          token_count?: number | null
+          transcription_text?: string
+          updated_at?: string
+          user_satisfaction?: string | null
+          verified_classification?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
