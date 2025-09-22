@@ -107,6 +107,21 @@ const resources = {
       completed: "مكتمل",
       failed: "فشل",
       
+      // Text Classifier
+      textClassifier: "تصنيف النص",
+      textClassifierDesc: "أدخل نص المحادثة مباشرة للحصول على تصنيف فوري باستخدام الذكاء الاصطناعي",
+      conversationText: "نص المحادثة",
+      conversationPlaceholder: "أدخل نص المحادثة هنا...\n\nمثال:\nمرحبا\nهلو\nالسلام عليكم\nمرحبا عليكم السلام\nيعطيك العافية كيف الحال\nالله يسلمك\nمعي الأخ فهد\nنعم فهد من شركة التحصيل...",
+      classifyText: "تصنيف النص",
+      classifying: "جارٍ التصنيف...",
+      characters: "حرف",
+      maxCharacters: "الحد الأقصى",
+      classificationResult: "نتيجة التصنيف",
+      textRequired: "نص المحادثة مطلوب",
+      classificationCompleted: "تم التصنيف بنجاح",
+      classificationError: "حدث خطأ في التصنيف",
+      textInput: "إدخال النص",
+      
       // Common
       loading: "جارٍ التحميل...",
       error: "خطأ",
