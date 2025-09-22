@@ -56,8 +56,8 @@ const TextClassifier = () => {
       // Create batch data for results page
       const textFile: BatchFile = {
         id: `text-${Date.now()}`,
-        name: `text-conversation-${new Date().toISOString().split('T')[0]}.txt`,
-        file: new File([text], `conversation-${Date.now()}.txt`, { type: 'text/plain' }),
+        name: `${t('textConversationFilename')}-${new Date().toISOString().split('T')[0]}.txt`,
+        file: new File([text], `${t('conversationFile')}-${Date.now()}.txt`, { type: 'text/plain' }),
         status: 'completed',
         transcription: text,
         classification: {

@@ -176,6 +176,10 @@ const resources = {
       sendFailed: "فشل الإرسال",
       failedToSendEmail: "فشل في إرسال البريد الإلكتروني. يرجى المحاولة مرة أخرى.",
       
+      // Filename translations
+      textConversationFilename: "محادثة-نص",
+      conversationFile: "ملف محادثة",
+      
       // Common
       loading: "جارٍ التحميل...",
       error: "خطأ",
