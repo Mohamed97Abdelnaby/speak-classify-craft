@@ -27,6 +27,7 @@ export type Database = {
           final_classification: string | null
           id: string
           processing_duration: number | null
+          summary: string | null
           token_count: number | null
           transcription_text: string
           updated_at: string
@@ -45,6 +46,7 @@ export type Database = {
           final_classification?: string | null
           id?: string
           processing_duration?: number | null
+          summary?: string | null
           token_count?: number | null
           transcription_text: string
           updated_at?: string
@@ -63,6 +65,7 @@ export type Database = {
           final_classification?: string | null
           id?: string
           processing_duration?: number | null
+          summary?: string | null
           token_count?: number | null
           transcription_text?: string
           updated_at?: string

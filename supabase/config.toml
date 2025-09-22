@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.save-transcription-result]
 verify_jwt = false
+
+[functions.summarize-conversation]
+verify_jwt = false

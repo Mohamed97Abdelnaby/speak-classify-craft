@@ -38,6 +38,22 @@ const TextClassifier = () => {
     try {
       console.log('Starting text classification:', text.substring(0, 100) + '...');
       
+      // Step 1: Summarize the text
+      console.log('Summarizing conversation text...');
+      const summaryResponse = await supabase.functions.invoke('summarize-conversation', {
+        body: { transcription: text }
+      });
+
+      let summary = '';
+      if (summaryResponse.error) {
+        console.error('Summarization error:', summaryResponse.error);
+        summary = text; // Fallback to original text
+      } else {
+        summary = summaryResponse.data.summary;
+        console.log('Summary result:', summary);
+      }
+      
+      // Step 2: Classify the text
       const { data, error } = await supabase.functions.invoke('classify-conversation', {
         body: { transcription: text }
       });
@@ -61,6 +77,7 @@ const TextClassifier = () => {
         file: new File([text], `${t('conversationFile')}-${Date.now()}.txt`, { type: 'text/plain' }),
         status: 'completed',
         transcription: text,
+        summary: summary,
         classification: {
           predicted: data.classification,
           confidence: 1,
@@ -86,6 +103,7 @@ const TextClassifier = () => {
           file_name: textFile.name,
           file_size: textFile.file.size,
           transcription_text: text,
+          summary: summary,
           ai_classification: data.classification,
           ai_confidence: 1,
           batch_id: batchData.id,

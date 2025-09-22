@@ -6,6 +6,7 @@ export interface SaveTranscriptionRequest {
   file_size?: number;  
   audio_duration?: number;
   transcription_text: string;
+  summary?: string;
   ai_classification: string;
   ai_confidence?: number;
   processing_duration?: number;
@@ -81,6 +82,7 @@ export const saveBatchTranscriptionResults = async (files: BatchFile[], batchId:
         file_name: file.name,
         file_size: file.file.size,
         transcription_text: file.transcription,
+        summary: file.summary,
         ai_classification: file.classification.aiClassification || file.classification.predicted,
         ai_confidence: file.classification.confidence,
         batch_id: batchId,

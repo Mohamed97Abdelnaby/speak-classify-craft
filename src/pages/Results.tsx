@@ -370,14 +370,14 @@ const Results = () => {
                 {/* Transcription */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">النص المستخرج</CardTitle>
+                    <CardTitle className="text-lg">ملخص المحادثة</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="p-4 bg-muted/50 rounded-md max-h-40 overflow-y-auto">
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap" dir="rtl">
-                        {file.transcription || 'لا يوجد نص مستخرج'}
-                      </p>
-                    </div>
+        <div className="p-4 bg-muted/50 rounded-md max-h-40 overflow-y-auto">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap" dir="rtl">
+            {file.summary || file.transcription || 'لا يوجد نص مستخرج'}
+          </p>
+        </div>
                   </CardContent>
                 </Card>
 

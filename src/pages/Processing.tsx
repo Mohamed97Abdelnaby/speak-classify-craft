@@ -13,6 +13,7 @@ const Processing = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [currentMessage, setCurrentMessage] = useState(0);
+  const [customMessage, setCustomMessage] = useState<string>("");
   const [processedCount, setProcessedCount] = useState(0);
   const [totalFiles, setTotalFiles] = useState(0);
   const batchId = searchParams.get('batch');
@@ -66,15 +67,55 @@ const Processing = () => {
         
         if (result.success && result.text) {
           console.log(`Transcription successful for ${file.name}:`, result.text.substring(0, 100) + '...');
-          // Update file with transcription and mark as completed
+          
+          // Step 2: Summarize the transcription
+          console.log(`Summarizing file ${i + 1}/${updatedFiles.length}: ${file.name}`);
+          setCustomMessage('تلخيص المحادثة...');
+          
+          const { supabase } = await import('@/integrations/supabase/client');
+          const summaryResponse = await supabase.functions.invoke('summarize-conversation', {
+            body: { transcription: result.text }
+          });
+
+          let summary = '';
+          if (summaryResponse.error) {
+            console.error(`Summarization failed for ${file.name}:`, summaryResponse.error);
+            summary = result.text; // Fallback to original transcription
+          } else {
+            summary = summaryResponse.data.summary;
+            console.log('Summary result:', summary);
+          }
+
+          // Step 3: Classify the transcription  
+          console.log(`Classifying file ${i + 1}/${updatedFiles.length}: ${file.name}`);
+          setCustomMessage('تصنيف المحادثة...');
+          
+          const classificationResponse = await supabase.functions.invoke('classify-conversation', {
+            body: { transcription: result.text }
+          });
+
+          let classification = {
+            predicted: file.category || 'غير مصنف',
+            confidence: Math.random() * 0.3 + 0.7
+          };
+
+          if (classificationResponse.error) {
+            console.error(`Classification failed for ${file.name}:`, classificationResponse.error);
+          } else {
+            classification = classificationResponse.data;
+            console.log('Classification result:', classification);
+          }
+          
+          // Update file with transcription, summary and classification
           updatedFiles[i] = { 
             ...file, 
             status: 'completed',
             transcription: result.text,
-            // Add mock classification for now
+            summary: summary,
             classification: {
-              predicted: file.category || 'غير مصنف',
-              confidence: Math.random() * 0.3 + 0.7 // Random confidence between 0.7-1.0
+              predicted: classification.predicted,
+              confidence: classification.confidence,
+              aiClassification: classification.predicted
             }
           };
           completedCount++;
@@ -86,7 +127,8 @@ const Processing = () => {
               file_name: file.name,
               file_size: file.file.size,
               transcription_text: result.text,
-              ai_classification: file.category || 'غير مصنف',
+              summary: updatedFiles[i].summary,
+              ai_classification: updatedFiles[i].classification?.aiClassification || 'غير مصنف',
               ai_confidence: updatedFiles[i].classification?.confidence,
               batch_id: batchId!,
               file_id: file.id
@@ -188,7 +230,7 @@ const Processing = () => {
       
       <main className="max-w-4xl mx-auto px-6 py-16">
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
-          <LoadingSpinner message={statusMessages[currentMessage]} />
+          <LoadingSpinner message={customMessage || statusMessages[currentMessage]} />
           {totalFiles > 0 && (
             <div className="mt-6 text-center">
               <div className="text-lg font-medium text-foreground mb-2">

@@ -148,13 +148,13 @@ const Review = () => {
       return;
     }
 
-    const headers = ['اسم الملف', 'النص المنسوخ', 'التصنيف'];
+    const headers = ['اسم الملف', 'ملخص المحادثة', 'التصنيف'];
     const csvContent = [
       headers.join(','),
       ...completedFiles.map(file => {
         const row = [
           `"${file.name}"`,
-          `"${(file.transcription || '').replace(/"/g, '""')}"`,
+          `"${(file.summary || file.transcription || '').replace(/"/g, '""')}"`,
           file.classification?.aiClassification || 'غير مصنف'
         ];
         return row.join(',');
@@ -267,7 +267,7 @@ const Review = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-right">اسم الملف</TableHead>
-                  <TableHead className="text-right">النص المكتوب</TableHead>
+                  <TableHead className="text-right">ملخص المحادثة</TableHead>
                   <TableHead className="text-right">التصنيف</TableHead>
                 </TableRow>
               </TableHeader>
@@ -279,7 +279,7 @@ const Review = () => {
                     </TableCell>
                     <TableCell className="text-right max-w-2xl">
                       <div className="whitespace-pre-wrap text-sm leading-relaxed p-2">
-                        {file.transcription || 'لا يوجد نص متاح'}
+                        {file.summary || file.transcription || 'لا يوجد نص متاح'}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">

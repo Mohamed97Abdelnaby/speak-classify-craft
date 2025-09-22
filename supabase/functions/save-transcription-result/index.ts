@@ -39,6 +39,7 @@ serve(async (req) => {
           file_size: requestData.file_size,
           audio_duration: requestData.audio_duration,
           transcription_text: requestData.transcription_text,
+          summary: requestData.summary,
           ai_classification: requestData.ai_classification,
           ai_confidence: requestData.ai_confidence,
           processing_duration: requestData.processing_duration,
