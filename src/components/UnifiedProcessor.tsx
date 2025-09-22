@@ -451,34 +451,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
             className="hidden"
           />
 
-          {/* Category Selection */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">{t("selectCategory")}</label>
-              {selectedCategory && uploadedFiles.length > 1 && (
-                <Button
-                  onClick={assignCategoryToAll}
-                  size="sm"
-                  variant="outline"
-                  className="text-xs"
-                >
-                  {t("selectForAll")}
-                </Button>
-              )}
-            </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger>
-                <SelectValue placeholder={t("selectCategory")} />
-              </SelectTrigger>
-              <SelectContent>
-                {allCategories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+
 
           {/* Files List */}
           {uploadedFiles.length > 0 && (
