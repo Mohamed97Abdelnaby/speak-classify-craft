@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BatchData, BatchFile } from "@/types/batch";
 import { serializeBatchData } from "@/utils/fileSerializer";
 import { setBatchData } from "@/utils/indexedDbStorage";
+import { saveTranscriptionResult } from "@/services/transcriptionStorageService";
 
 const TextClassifier = () => {
   const { t } = useTranslation();
@@ -78,6 +79,23 @@ const TextClassifier = () => {
       // Save to IndexedDB and navigate to results
       const serializedData = await serializeBatchData(batchData);
       await setBatchData(batchData.id, serializedData);
+      
+      // Save transcription result to database
+      try {
+        await saveTranscriptionResult({
+          file_name: textFile.name,
+          file_size: textFile.file.size,
+          transcription_text: text,
+          ai_classification: data.classification,
+          ai_confidence: 1,
+          batch_id: batchData.id,
+          file_id: textFile.id
+        });
+        console.log('Text classification saved to database:', textFile.id);
+      } catch (dbError) {
+        console.error('Failed to save text classification to database:', dbError);
+        // Continue with navigation even if database save fails - user can still see results
+      }
       
       toast({
         title: t("success"),
