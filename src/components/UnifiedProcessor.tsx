@@ -479,32 +479,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-2 space-x-reverse flex-shrink-0">
-                      <Select
-                        value={file.category || ""}
-                        onValueChange={(category) => updateFileCategory(file.id, category)}
-                      >
-                        <SelectTrigger className="w-32 h-8 text-xs">
-                          <SelectValue placeholder="فئة" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {allCategories.map((category) => (
-                            <SelectItem key={category} value={category} className="text-xs">
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      
-                      <Button
-                        onClick={() => removeFile(file.id)}
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
+                  
                   </div>
                 ))}
               </div>
