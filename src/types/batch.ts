@@ -10,6 +10,8 @@ export interface BatchFile {
     predicted: string;
     confidence: number;
     verified?: string;
+    aiClassification?: string;
+    classificationTimestamp?: string;
   };
 }
 

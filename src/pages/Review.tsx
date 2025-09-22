@@ -8,12 +8,14 @@ import { ArrowLeft, Download, RotateCcw } from "lucide-react";
 import { BatchFile } from "@/types/batch";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { supabase } from "@/integrations/supabase/client";
 
 const Review = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [files, setFiles] = useState<BatchFile[]>([]);
+  const [isClassifying, setIsClassifying] = useState(false);
   const { toast } = useToast();
   const batchId = searchParams.get('batch');
 
@@ -47,6 +49,93 @@ const Review = () => {
     loadBatchData();
   }, [batchId, navigate]);
 
+  const handleClassifyAll = async () => {
+    const completedFiles = files.filter(file => 
+      file.status === 'completed' && file.transcription
+    );
+
+    if (completedFiles.length === 0) {
+      toast({
+        title: "لا توجد ملفات للتصنيف",
+        description: "تحتاج إلى ملفات مكتملة للتصنيف",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsClassifying(true);
+
+    try {
+      const updatedFiles = [...files];
+      
+      for (const file of completedFiles) {
+        try {
+          console.log(`Classifying file: ${file.name}`);
+          
+          const { data, error } = await supabase.functions.invoke('classify-conversation', {
+            body: { transcription: file.transcription }
+          });
+
+          if (error) {
+            console.error('Classification error:', error);
+            continue;
+          }
+
+          if (data.success) {
+            const fileIndex = updatedFiles.findIndex(f => f.id === file.id);
+            if (fileIndex !== -1) {
+              updatedFiles[fileIndex] = {
+                ...updatedFiles[fileIndex],
+                classification: {
+                  ...updatedFiles[fileIndex].classification,
+                  aiClassification: data.classification,
+                  classificationTimestamp: data.timestamp,
+                  predicted: data.classification,
+                  confidence: 95
+                }
+              };
+            }
+          }
+        } catch (error) {
+          console.error(`Error classifying file ${file.name}:`, error);
+        }
+      }
+
+      setFiles(updatedFiles);
+
+      // Update storage
+      if (batchId) {
+        const { setBatchData } = await import('@/utils/indexedDbStorage');
+        const { serializeBatchData } = await import('@/utils/fileSerializer');
+        
+        const batchData = {
+          id: batchId,
+          files: updatedFiles,
+          createdAt: new Date(),
+          status: 'completed' as const,
+        };
+        
+        const serializedBatchData = await serializeBatchData(batchData);
+        await setBatchData(batchId, serializedBatchData);
+      }
+
+      toast({
+        title: "تم التصنيف",
+        description: "تم تصنيف المحادثات بنجاح",
+      });
+
+    } catch (error) {
+      console.error('Classification error:', error);
+      toast({
+        title: "خطأ في التصنيف",
+        description: "حدث خطأ أثناء التصنيف",
+        variant: "destructive",
+      });
+    } finally {
+      setIsClassifying(false);
+    }
+  };
+
   const downloadCSV = () => {
     const completedFiles = files.filter(f => f.status === 'completed' && f.transcription);
     
@@ -59,16 +148,14 @@ const Review = () => {
       return;
     }
 
-    const headers = [t("callId"), t("fileName"), t("transcribedText"), t("classification"), 'الثقة'];
+    const headers = ['اسم الملف', 'النص المنسوخ', 'التصنيف'];
     const csvContent = [
       headers.join(','),
       ...completedFiles.map(file => {
         const row = [
-          file.id,
           `"${file.name}"`,
           `"${(file.transcription || '').replace(/"/g, '""')}"`,
-          file.classification?.predicted || '',
-          file.classification?.confidence || ''
+          file.classification?.aiClassification || 'غير مصنف'
         ];
         return row.join(',');
       })
@@ -181,6 +268,7 @@ const Review = () => {
                 <TableRow>
                   <TableHead className="text-right">اسم الملف</TableHead>
                   <TableHead className="text-right">النص المكتوب</TableHead>
+                  <TableHead className="text-right">التصنيف</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -193,6 +281,17 @@ const Review = () => {
                       <div className="whitespace-pre-wrap text-sm leading-relaxed p-2">
                         {file.transcription || 'لا يوجد نص متاح'}
                       </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {file.classification?.aiClassification ? (
+                        <Badge variant="default" className="text-sm">
+                          {file.classification.aiClassification}
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="text-sm">
+                          غير مصنف
+                        </Badge>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -216,15 +315,11 @@ const Review = () => {
             <div className="bg-muted/20 rounded-lg border p-6 min-w-[300px] text-center">
               <Button
                 size="lg"
-                onClick={() => {
-                  toast({
-                    title: "التصنيف",
-                    description: "سيتم إضافة وظيفة التصنيف قريباً",
-                  });
-                }}
+                onClick={handleClassifyAll}
+                disabled={isClassifying}
                 className="text-lg px-8"
               >
-                صنف
+                {isClassifying ? "جاري التصنيف..." : "صنف"}
               </Button>
             </div>
           </div>
