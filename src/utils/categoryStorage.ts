@@ -15,12 +15,12 @@ export const getUserCategories = (): string[] => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const categories = JSON.parse(stored);
-      return Array.isArray(categories) && categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+      return Array.isArray(categories) ? categories : [];
     }
   } catch (error) {
     console.error('Error loading user categories:', error);
   }
-  return DEFAULT_CATEGORIES;
+  return [];
 };
 
 export const saveUserCategories = (categories: string[]): void => {

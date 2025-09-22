@@ -193,21 +193,28 @@ const TranscriptionResults = () => {
             <CardTitle className="text-lg">تأكيد التصنيف</CardTitle>
           </CardHeader>
           <CardContent>
-            <Select
-              value={verifiedCategory}
-              onValueChange={setVerifiedCategory}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="اختر التصنيف" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map(category => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {categories.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground">
+                <p className="mb-2">لا توجد فئات متاحة</p>
+                <p className="text-sm">يرجى إضافة فئات في إعدادات التصنيف أولاً</p>
+              </div>
+            ) : (
+              <Select
+                value={verifiedCategory}
+                onValueChange={setVerifiedCategory}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر التصنيف" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(category => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </CardContent>
         </Card>
       )}

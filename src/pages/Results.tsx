@@ -341,53 +341,62 @@ const Results = () => {
                     <CardTitle className="text-lg">التصنيف</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div>
-                      <p className="text-sm font-medium mb-2">تصنيف الذكي الاصطناعي</p>
-                      <div className="flex items-center space-x-2">
-                        <Badge 
-                          variant="secondary"
-                          className="bg-primary/10 text-primary border-primary/20"
-                        >
-                          {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
-                        </Badge>
-                        {file.classification?.classificationTimestamp && (
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(file.classification.classificationTimestamp).toLocaleString('ar-SA')}
-                          </span>
-                        )}
+                    {categories.length === 0 ? (
+                      <div className="text-center py-6 text-muted-foreground">
+                        <p className="mb-2">لا توجد فئات متاحة</p>
+                        <p className="text-sm">يرجى إضافة فئات في إعدادات التصنيف أولاً</p>
                       </div>
-                    </div>
-                    
-                    {(satisfactionAnswers[file.id] === null || satisfactionAnswers[file.id] === undefined || satisfactionAnswers[file.id] === 'not-satisfied') && (
-                      <div>
-                        <p className="text-sm font-medium mb-2">تأكيد التصنيف</p>
-                        <Select
-                          value={file.classification?.verified || file.classification?.aiClassification || file.classification?.predicted || ""}
-                          onValueChange={(value) => updateFileVerification(file.id, value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="اختر التصنيف" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {categories.map(category => (
-                              <SelectItem key={category} value={category}>
-                                {category}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                    
-                    {file.classification?.verified && (
-                      <div className="p-3 bg-success/10 rounded-md">
-                        <div className="flex items-center space-x-2">
-                          <CheckCircle className="w-4 h-4 text-success" />
-                          <span className="text-sm font-medium text-success">
-                            تم التأكيد كـ "{file.classification.verified}"
-                          </span>
+                    ) : (
+                      <>
+                        <div>
+                          <p className="text-sm font-medium mb-2">تصنيف الذكي الاصطناعي</p>
+                          <div className="flex items-center space-x-2">
+                            <Badge 
+                              variant="secondary"
+                              className="bg-primary/10 text-primary border-primary/20"
+                            >
+                              {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
+                            </Badge>
+                            {file.classification?.classificationTimestamp && (
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(file.classification.classificationTimestamp).toLocaleString('ar-SA')}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
+                        
+                        {(satisfactionAnswers[file.id] === null || satisfactionAnswers[file.id] === undefined || satisfactionAnswers[file.id] === 'not-satisfied') && (
+                          <div>
+                            <p className="text-sm font-medium mb-2">تأكيد التصنيف</p>
+                            <Select
+                              value={file.classification?.verified || file.classification?.aiClassification || file.classification?.predicted || ""}
+                              onValueChange={(value) => updateFileVerification(file.id, value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر التصنيف" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {categories.map(category => (
+                                  <SelectItem key={category} value={category}>
+                                    {category}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                        
+                        {file.classification?.verified && (
+                          <div className="p-3 bg-success/10 rounded-md">
+                            <div className="flex items-center space-x-2">
+                              <CheckCircle className="w-4 h-4 text-success" />
+                              <span className="text-sm font-medium text-success">
+                                تم التأكيد كـ "{file.classification.verified}"
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
                   </CardContent>
                 </Card>
