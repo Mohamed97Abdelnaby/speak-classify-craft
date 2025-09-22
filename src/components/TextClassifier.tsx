@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,10 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { MessageSquare, Loader2, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { BatchData, BatchFile } from "@/types/batch";
+import { serializeBatchData } from "@/utils/fileSerializer";
+import { setBatchData } from "@/utils/indexedDbStorage";
 
 const TextClassifier = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [text, setText] = useState("");
   const [isClassifying, setIsClassifying] = useState(false);
   const [classification, setClassification] = useState<string | null>(null);
@@ -48,10 +53,39 @@ const TextClassifier = () => {
       setClassification(data.classification);
       setClassificationTimestamp(data.timestamp);
       
+      // Create batch data for results page
+      const textFile: BatchFile = {
+        id: `text-${Date.now()}`,
+        name: `text-conversation-${new Date().toISOString().split('T')[0]}.txt`,
+        file: new File([text], `conversation-${Date.now()}.txt`, { type: 'text/plain' }),
+        status: 'completed',
+        transcription: text,
+        classification: {
+          predicted: data.classification,
+          confidence: 1,
+          aiClassification: data.classification,
+          classificationTimestamp: data.timestamp
+        }
+      };
+
+      const batchData: BatchData = {
+        id: `batch-text-${Date.now()}`,
+        files: [textFile],
+        createdAt: new Date(),
+        status: 'completed'
+      };
+
+      // Save to IndexedDB and navigate to results
+      const serializedData = await serializeBatchData(batchData);
+      await setBatchData(batchData.id, serializedData);
+      
       toast({
         title: t("success"),
         description: t("classificationCompleted"),
       });
+
+      // Navigate to results page
+      navigate('/results');
 
     } catch (error) {
       console.error('Text classification error:', error);

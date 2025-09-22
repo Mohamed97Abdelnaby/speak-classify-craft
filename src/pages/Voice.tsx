@@ -79,22 +79,25 @@ const Voice = () => {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Voice Input Section */}
-          <div>
-            <h2 className="text-2xl font-semibold text-foreground mb-4">{t("audioInput")}</h2>
-            <VoiceRecorder />
-          </div>
+        <div className="space-y-8">
+          {/* Audio and Text Input Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Voice Input Section */}
+            <div>
+              <h2 className="text-2xl font-semibold text-foreground mb-4">{t("audioInput")}</h2>
+              <VoiceRecorder />
+            </div>
 
-          {/* Text Input Section */}
-          <div>
-            <h2 className="text-2xl font-semibold text-foreground mb-4">{t("textInput")}</h2>
-            <TextClassifier />
+            {/* Text Input Section */}
+            <div>
+              <h2 className="text-2xl font-semibold text-foreground mb-4">{t("textInput")}</h2>
+              <TextClassifier />
+            </div>
           </div>
 
           {/* Category Management Section */}
-          <div>
-            <h2 className="text-2xl font-semibold text-foreground mb-4">{t("classificationCategories")}</h2>
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-2xl font-semibold text-foreground mb-4 text-center">{t("classificationCategories")}</h2>
             <CategoryManager />
           </div>
         </div>
