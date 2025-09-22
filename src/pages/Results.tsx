@@ -365,7 +365,7 @@ const Results = () => {
                           </div>
                         </div>
                         
-                        {(satisfactionAnswers[file.id] === null || satisfactionAnswers[file.id] === undefined || satisfactionAnswers[file.id] === 'not-satisfied') && (
+                        {satisfactionAnswers[file.id] === 'not-satisfied' && (
                           <div>
                             <p className="text-sm font-medium mb-2">تأكيد التصنيف</p>
                             <Select
@@ -403,31 +403,29 @@ const Results = () => {
               </div>
 
               {/* Satisfaction Survey */}
-              {!satisfactionAnswers[file.id] && (
-                <Card className="mt-6">
-                  <CardContent className="pt-6">
-                    <div className="text-center space-y-4">
-                      <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
-                      <div className="flex justify-center gap-4">
-                        <Button
-                          onClick={() => handleSatisfactionResponse(file.id, 'satisfied')}
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                          variant={satisfactionAnswers[file.id] === 'satisfied' ? 'default' : 'outline'}
-                        >
-                          {t('yesSatisfied')}
-                        </Button>
-                        <Button
-                          onClick={() => handleSatisfactionResponse(file.id, 'not-satisfied')}
-                          className="bg-red-600 hover:bg-red-700 text-white"
-                          variant={satisfactionAnswers[file.id] === 'not-satisfied' ? 'default' : 'outline'}
-                        >
-                          {t('notSatisfied')}
-                        </Button>
-                      </div>
+              <Card className="mt-6">
+                <CardContent className="pt-6">
+                  <div className="text-center space-y-4">
+                    <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
+                    <div className="flex justify-center gap-4">
+                      <Button
+                        onClick={() => handleSatisfactionResponse(file.id, 'satisfied')}
+                        variant={satisfactionAnswers[file.id] === 'satisfied' ? 'default' : 'outline'}
+                        className={satisfactionAnswers[file.id] === 'satisfied' ? 'bg-green-600 hover:bg-green-700 text-white' : ''}
+                      >
+                        {t('yesSatisfied')}
+                      </Button>
+                      <Button
+                        onClick={() => handleSatisfactionResponse(file.id, 'not-satisfied')}
+                        variant={satisfactionAnswers[file.id] === 'not-satisfied' ? 'default' : 'outline'}
+                        className={satisfactionAnswers[file.id] === 'not-satisfied' ? 'bg-red-600 hover:bg-red-700 text-white' : ''}
+                      >
+                        {t('notSatisfied')}
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           ))}
         </Tabs>

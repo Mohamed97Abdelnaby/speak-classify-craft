@@ -186,8 +186,8 @@ const TranscriptionResults = () => {
         </CardContent>
       </Card>
 
-      {/* Confirmation Classification - Only show if not satisfied or no response yet */}
-      {(satisfactionResponse === null || satisfactionResponse === 'not-satisfied') && (
+      {/* Confirmation Classification - Only show if not satisfied */}
+      {satisfactionResponse === 'not-satisfied' && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">تأكيد التصنيف</CardTitle>
@@ -220,31 +220,29 @@ const TranscriptionResults = () => {
       )}
 
       {/* Satisfaction Survey */}
-      {!satisfactionResponse && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
-              <div className="flex justify-center gap-4">
-                <Button
-                  onClick={() => handleSatisfactionResponse('satisfied')}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  variant={satisfactionResponse === 'satisfied' ? 'default' : 'outline'}
-                >
-                  {t('yesSatisfied')}
-                </Button>
-                <Button
-                  onClick={() => handleSatisfactionResponse('not-satisfied')}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                  variant={satisfactionResponse === 'not-satisfied' ? 'default' : 'outline'}
-                >
-                  {t('notSatisfied')}
-                </Button>
-              </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
+            <div className="flex justify-center gap-4">
+              <Button
+                onClick={() => handleSatisfactionResponse('satisfied')}
+                variant={satisfactionResponse === 'satisfied' ? 'default' : 'outline'}
+                className={satisfactionResponse === 'satisfied' ? 'bg-green-600 hover:bg-green-700 text-white' : ''}
+              >
+                {t('yesSatisfied')}
+              </Button>
+              <Button
+                onClick={() => handleSatisfactionResponse('not-satisfied')}
+                variant={satisfactionResponse === 'not-satisfied' ? 'default' : 'outline'}
+                className={satisfactionResponse === 'not-satisfied' ? 'bg-red-600 hover:bg-red-700 text-white' : ''}
+              >
+                {t('notSatisfied')}
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
