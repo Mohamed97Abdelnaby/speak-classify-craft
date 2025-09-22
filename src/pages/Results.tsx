@@ -15,7 +15,7 @@ import { getBatchData } from "@/utils/indexedDbStorage";
 import { deserializeBatchData } from "@/utils/fileSerializer";
 import { useTranslation } from "react-i18next";
 import { getUserCategories } from "@/utils/categoryStorage";
-import { updateSatisfactionResponse, updateVerifiedClassification } from "@/services/transcriptionStorageService";
+import { updateSatisfactionResponse, updateVerifiedClassification, updateFinalClassification } from "@/services/transcriptionStorageService";
 
 const Results = () => {
   const { t } = useTranslation();
@@ -86,29 +86,30 @@ const Results = () => {
               }
             : file
         ),
-        status: 'completed'
+        createdAt: new Date(),
+        status: 'completed' as const
       };
-      localStorage.setItem(`batch-${batchId}`, JSON.stringify(batchData));
+      
+      localStorage.setItem(`batchData_${batchId}`, JSON.stringify(batchData));
     }
 
-    // Save verified classification to database using the service function
-    const result = await updateVerifiedClassification(fileId, verifiedCategory);
+    // Save final classification (verified category) to database for unsatisfied users
+    const result = await updateFinalClassification(fileId, verifiedCategory, 'not-satisfied');
     
     if (!result.success) {
-      console.error('Error saving verified classification:', result.error);
+      console.error('Error saving final classification:', result.error);
       toast({
         title: "خطأ",
-        description: "فشل في حفظ التصنيف المؤكد",
+        description: "فشل في حفظ التصنيف النهائي",
         variant: "destructive"
       });
     } else {
-      console.log('Verified classification saved successfully');
+      console.log('Final classification saved successfully');
+      toast({
+        title: t("success"),
+        description: `${t("categoryVerifiedAs")} "${verifiedCategory}"`,
+      });
     }
-    
-    toast({
-      title: t("verificationUpdated"),
-      description: `${t("categoryVerifiedAs")} "${verifiedCategory}"`,
-    });
   };
 
   const handleNewTranscription = () => {
@@ -126,24 +127,40 @@ const Results = () => {
   };
 
   const handleSatisfactionResponse = async (fileId: string, response: 'satisfied' | 'not-satisfied') => {
+    const file = files.find(f => f.id === fileId);
+    if (!file || !file.classification) return;
+
     setSatisfactionAnswers(prev => ({
       ...prev,
       [fileId]: response
     }));
 
-    // Save satisfaction response to database using the service function
-    const result = await updateSatisfactionResponse(fileId, response);
+    // Determine final classification based on satisfaction response
+    let finalClassification: string;
     
-    if (!result.success) {
-      console.error('Error saving satisfaction response:', result.error);
-      toast({
-        title: "خطأ",
-        description: "فشل في حفظ رد الرضا",
-        variant: "destructive"
-      });
-    } else {
-      console.log('Satisfaction response saved successfully');
+    if (response === 'satisfied') {
+      // User is satisfied with AI classification
+      finalClassification = file.classification.aiClassification || file.classification.predicted || '';
+      
+      // Save final classification immediately
+      const result = await updateFinalClassification(fileId, finalClassification, response);
+      
+      if (!result.success) {
+        console.error('Error saving final classification:', result.error);
+        toast({
+          title: "خطأ",
+          description: "فشل في حفظ التصنيف النهائي",
+          variant: "destructive"
+        });
+      } else {
+        console.log('Final classification saved successfully');
+        toast({
+          title: t("success"),
+          description: "تم حفظ التصنيف بنجاح",
+        });
+      }
     }
+    // If not satisfied, don't save yet - wait for user to select category
   };
   
   // If no batch data, show single file results (legacy)
@@ -378,13 +395,25 @@ const Results = () => {
                     ) : (
                       <>
                         <div>
-                          <p className="text-sm font-medium mb-2">تصنيف الذكي الاصطناعي</p>
+                          <p className="text-sm font-medium mb-2">التصنيف النهائي</p>
                           <div className="flex items-center space-x-2">
                             <Badge 
-                              variant="secondary"
-                              className="bg-primary/10 text-primary border-primary/20"
+                              variant={satisfactionAnswers[file.id] === 'satisfied' ? "default" : file.classification?.verified ? "secondary" : "outline"}
+                              className={
+                                satisfactionAnswers[file.id] === 'satisfied' 
+                                  ? "bg-success/10 text-success border-success/20" 
+                                  : file.classification?.verified 
+                                    ? "bg-primary/10 text-primary border-primary/20"
+                                    : "bg-muted/10 text-muted-foreground border-muted/20"
+                              }
                             >
-                              {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
+                              {
+                                satisfactionAnswers[file.id] === 'satisfied' 
+                                  ? (file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد')
+                                  : file.classification?.verified 
+                                    ? file.classification.verified
+                                    : (file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد')
+                              }
                             </Badge>
                             {file.classification?.classificationTimestamp && (
                               <span className="text-xs text-muted-foreground">
@@ -392,17 +421,37 @@ const Results = () => {
                               </span>
                             )}
                           </div>
+                          {satisfactionAnswers[file.id] === 'satisfied' && (
+                            <div className="mt-2 p-2 bg-success/10 rounded-md">
+                              <div className="flex items-center space-x-2">
+                                <CheckCircle className="w-3 h-3 text-success" />
+                                <span className="text-xs text-success">
+                                  تم الموافقة على تصنيف الذكي الاصطناعي
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                          {file.classification?.verified && satisfactionAnswers[file.id] === 'not-satisfied' && (
+                            <div className="mt-2 p-2 bg-primary/10 rounded-md">
+                              <div className="flex items-center space-x-2">
+                                <CheckCircle className="w-3 h-3 text-primary" />
+                                <span className="text-xs text-primary">
+                                  تم التصحيح بواسطة المستخدم
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                         
-                        {satisfactionAnswers[file.id] === 'not-satisfied' && (
+                        {satisfactionAnswers[file.id] === 'not-satisfied' && !file.classification?.verified && (
                           <div>
-                            <p className="text-sm font-medium mb-2">تأكيد التصنيف</p>
+                            <p className="text-sm font-medium mb-2">تصحيح التصنيف</p>
                             <Select
-                              value={file.classification?.verified || file.classification?.aiClassification || file.classification?.predicted || ""}
+                              value=""
                               onValueChange={(value) => updateFileVerification(file.id, value)}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="اختر التصنيف" />
+                                <SelectValue placeholder="اختر التصنيف الصحيح" />
                               </SelectTrigger>
                               <SelectContent>
                                 {categories.map(category => (
@@ -415,16 +464,6 @@ const Results = () => {
                           </div>
                         )}
                         
-                        {file.classification?.verified && (
-                          <div className="p-3 bg-success/10 rounded-md">
-                            <div className="flex items-center space-x-2">
-                              <CheckCircle className="w-4 h-4 text-success" />
-                              <span className="text-sm font-medium text-success">
-                                تم التأكيد كـ "{file.classification.verified}"
-                              </span>
-                            </div>
-                          </div>
-                        )}
                       </>
                     )}
                   </CardContent>

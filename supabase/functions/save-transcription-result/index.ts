@@ -123,6 +123,37 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
 
+    } else if (operation === 'update_final_classification') {
+      // Update existing record with final classification after satisfaction response
+      const { data, error } = await supabase
+        .from('transcription_results')
+        .update({
+          final_classification: requestData.final_classification,
+          user_satisfaction: requestData.user_satisfaction
+        })
+        .eq('file_id', requestData.file_id)
+        .select()
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error updating final classification:', error);
+        throw error;
+      }
+
+      if (!data) {
+        console.error('No record found with file_id:', requestData.file_id);
+        throw new Error(`No transcription record found with file_id: ${requestData.file_id}`);
+      }
+
+      console.log('Updated final classification for file:', requestData.file_id);
+      return new Response(JSON.stringify({ 
+        success: true, 
+        id: data.id,
+        message: 'Final classification updated successfully'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+
     } else {
       throw new Error(`Unknown operation: ${operation}`);
     }

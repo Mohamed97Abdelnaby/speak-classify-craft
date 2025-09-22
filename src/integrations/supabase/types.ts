@@ -24,6 +24,7 @@ export type Database = {
           file_id: string | null
           file_name: string
           file_size: number | null
+          final_classification: string | null
           id: string
           processing_duration: number | null
           token_count: number | null
@@ -41,6 +42,7 @@ export type Database = {
           file_id?: string | null
           file_name: string
           file_size?: number | null
+          final_classification?: string | null
           id?: string
           processing_duration?: number | null
           token_count?: number | null
@@ -58,6 +60,7 @@ export type Database = {
           file_id?: string | null
           file_name?: string
           file_size?: number | null
+          final_classification?: string | null
           id?: string
           processing_duration?: number | null
           token_count?: number | null

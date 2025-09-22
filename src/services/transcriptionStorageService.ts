@@ -163,3 +163,44 @@ export const updateVerifiedClassification = async (fileId: string, verifiedClass
     };
   }
 };
+
+/**
+ * Update final classification after user satisfaction response
+ */
+export const updateFinalClassification = async (
+  fileId: string, 
+  finalClassification: string, 
+  userSatisfaction: 'satisfied' | 'not-satisfied'
+): Promise<SaveTranscriptionResult> => {
+  try {
+    const { data: result, error } = await supabase.functions.invoke('save-transcription-result', {
+      body: { 
+        operation: 'update_final_classification',
+        file_id: fileId,
+        final_classification: finalClassification,
+        user_satisfaction: userSatisfaction
+      }
+    });
+
+    if (error) {
+      console.error('Error updating final classification:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to update final classification'
+      };
+    }
+
+    console.log('Successfully updated final classification for file:', fileId);
+    return {
+      success: true,
+      id: result.id
+    };
+
+  } catch (error) {
+    console.error('Failed to update final classification:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+};
