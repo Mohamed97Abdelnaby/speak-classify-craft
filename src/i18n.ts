@@ -77,7 +77,6 @@ const resources = {
       classification: "التصنيف",
       noResultsFound: "لم يتم العثور على نتائج",
       noCompletedFiles: "لا توجد ملفات مكتملة للعرض. يرجى المحاولة مرة أخرى لاحقاً.",
-      refreshResults: "تحديث النتائج",
       
       // Default Categories
       businessMeeting: "اجتماع عمل",
@@ -121,6 +120,36 @@ const resources = {
       classificationCompleted: "تم التصنيف بنجاح",
       classificationError: "حدث خطأ في التصنيف",
       textInput: "إدخال النص",
+      
+      // Results Page
+      backToVoiceInput: "العودة لإدخال الصوت",
+      transcriptionResults: "نتائج النسخ",
+      reviewTranscriptionContent: "راجع المحتوى المنسوخ وتصنيف الذكاء الاصطناعي",
+      reviewAndVerifyResults: "راجع وتحقق من نتائج النسخ والتصنيف",
+      share: "مشاركة",
+      export: "تصدير",
+      newTranscription: "نسخ جديد",
+      newBatch: "مجموعة جديدة",
+      exportResults: "تصدير النتائج",
+      downloadTranscriptionResults: "تحميل نتائج النسخ والتصنيف بصيغة نص أو CSV",
+      shareResults: "مشاركة النتائج",
+      shareWithColleagues: "شارك نتائجك مع الزملاء أو احفظها في التخزين السحابي",
+      processNewAudio: "معالجة صوت جديد",
+      startNewSession: "بدء جلسة نسخ وتصنيف جديدة",
+      batchResults: "نتائج المجموعة",
+      file: "ملف",
+      files: "ملفات",
+      verificationUpdated: "تم تحديث التحقق",
+      categoryVerifiedAs: "تم تأكيد الفئة كـ",
+      
+      // Review Page
+      classificationComplete: "اكتمل التصنيف",
+      callClassified: "مكالمة مصنفة",
+      callsClassified: "مكالمات مصنفة",
+      readyForExport: "جاهز للتصدير",
+      noClassificationResults: "لم يتم العثور على نتائج التصنيف",
+      noCompletedClassifications: "لا توجد تصنيفات مكتملة. قد تكون المعالجة لا تزال قيد التقدم",
+      refreshResults: "تحديث النتائج",
       
       // Common
       loading: "جارٍ التحميل...",

@@ -13,8 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 import { BatchFile } from "@/types/batch";
 import { getBatchData } from "@/utils/indexedDbStorage";
 import { deserializeBatchData } from "@/utils/fileSerializer";
+import { useTranslation } from "react-i18next";
 
 const Results = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [files, setFiles] = useState<BatchFile[]>([]);
@@ -82,8 +84,8 @@ const Results = () => {
     }
     
     toast({
-      title: "Verification Updated",
-      description: `Category verified as "${verifiedCategory}"`,
+      title: t("verificationUpdated"),
+      description: `${t("categoryVerifiedAs")} "${verifiedCategory}"`,
     });
   };
 
@@ -127,17 +129,17 @@ const Results = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => navigate("/")}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 space-x-reverse"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Back to Voice Input</span>
+                <span>{t("backToVoiceInput")}</span>
               </Button>
               <div>
                 <h1 className="text-3xl font-bold text-foreground">
-                  Transcription Results
+                  {t("transcriptionResults")}
                 </h1>
                 <p className="text-muted-foreground">
-                  Review your transcribed content and AI classification
+                  {t("reviewTranscriptionContent")}
                 </p>
               </div>
             </div>
@@ -147,26 +149,26 @@ const Results = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleShare}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 space-x-reverse"
               >
                 <Share2 className="w-4 h-4" />
-                <span>Share</span>
+                <span>{t("share")}</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleExport}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 space-x-reverse"
               >
                 <Download className="w-4 h-4" />
-                <span>Export</span>
+                <span>{t("export")}</span>
               </Button>
               <Button
                 onClick={handleNewTranscription}
-                className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2"
+                className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>New Transcription</span>
+                <span>{t("newTranscription")}</span>
               </Button>
             </div>
           </div>
@@ -180,42 +182,42 @@ const Results = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             <Card className="hover:shadow-md transition-all duration-200 cursor-pointer" onClick={handleExport}>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-lg">
+                <CardTitle className="flex items-center space-x-2 space-x-reverse text-lg">
                   <Download className="w-5 h-5 text-primary" />
-                  <span>Export Results</span>
+                  <span>{t("exportResults")}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Download your transcription and classification results as text or CSV
+                  {t("downloadTranscriptionResults")}
                 </p>
               </CardContent>
             </Card>
             
             <Card className="hover:shadow-md transition-all duration-200 cursor-pointer" onClick={handleShare}>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-lg">
+                <CardTitle className="flex items-center space-x-2 space-x-reverse text-lg">
                   <Share2 className="w-5 h-5 text-primary" />
-                  <span>Share Results</span>
+                  <span>{t("shareResults")}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Share your results with colleagues or save to cloud storage
+                  {t("shareWithColleagues")}
                 </p>
               </CardContent>
             </Card>
             
             <Card className="hover:shadow-md transition-all duration-200 cursor-pointer" onClick={handleNewTranscription}>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-lg">
+                <CardTitle className="flex items-center space-x-2 space-x-reverse text-lg">
                   <RotateCcw className="w-5 h-5 text-primary" />
-                  <span>Process New Audio</span>
+                  <span>{t("processNewAudio")}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Start a new transcription and classification session
+                  {t("startNewSession")}
                 </p>
               </CardContent>
             </Card>
@@ -237,17 +239,17 @@ const Results = () => {
               variant="outline"
               size="sm"
               onClick={() => navigate("/")}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 space-x-reverse"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Voice Input</span>
+              <span>{t("backToVoiceInput")}</span>
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-foreground">
-                Batch Results ({files.length} files)
+                {t("batchResults")} ({files.length} {files.length === 1 ? t("file") : t("files")})
               </h1>
               <p className="text-muted-foreground">
-                Review and verify your transcription and classification results
+                {t("reviewAndVerifyResults")}
               </p>
             </div>
           </div>
@@ -258,17 +260,17 @@ const Results = () => {
               variant="outline"
               size="sm"
               onClick={handleExport}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 space-x-reverse"
             >
               <Download className="w-4 h-4" />
-              <span>Export</span>
+              <span>{t("export")}</span>
             </Button>
             <Button
               onClick={handleNewTranscription}
-              className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2"
+              className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse"
             >
               <RotateCcw className="w-4 h-4" />
-              <span>New Batch</span>
+              <span>{t("newBatch")}</span>
             </Button>
           </div>
         </div>
@@ -282,9 +284,9 @@ const Results = () => {
                 value={file.id}
                 className="min-w-[150px] text-left"
               >
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 space-x-reverse">
                   <FileText className="w-4 h-4" />
-                  <span className="truncate">File {index + 1}</span>
+                  <span className="truncate">{t("file")} {index + 1}</span>
                   {file.classification?.verified && (
                     <CheckCircle className="w-3 h-3 text-success" />
                   )}

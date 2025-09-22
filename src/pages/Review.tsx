@@ -184,10 +184,10 @@ const Review = () => {
         <Navigation />
         <main className="max-w-4xl mx-auto px-6 py-16">
           <div className="text-center">
-            <p className="text-muted-foreground">No classification results found.</p>
+            <p className="text-muted-foreground">{t("noClassificationResults")}</p>
             <Button onClick={() => navigate("/")} className="mt-4">
-              <RotateCcw className="w-4 h-4 mr-2" />
-              Start Over
+              <RotateCcw className="w-4 h-4 ml-2" />
+              {t("startOver")}
             </Button>
           </div>
         </main>
@@ -246,15 +246,15 @@ const Review = () => {
         <div className="mb-8 p-4 bg-muted/20 rounded-lg border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Classification Complete</p>
+              <p className="text-sm font-medium">{t("classificationComplete")}</p>
               <p className="text-2xl font-bold text-primary">{completedFiles.length}</p>
               <p className="text-sm text-muted-foreground">
-                {completedFiles.length === 1 ? 'Call classified' : 'Calls classified'}
+                {completedFiles.length === 1 ? t("callClassified") : t("callsClassified")}
               </p>
             </div>
             {completedFiles.length > 0 && (
               <Badge variant="default" className="text-sm">
-                Ready for Export
+                {t("readyForExport")}
               </Badge>
             )}
           </div>
@@ -301,10 +301,10 @@ const Review = () => {
         ) : (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">
-              No completed classifications found. Processing may still be in progress.
+              {t("noCompletedClassifications")}
             </p>
             <Button onClick={() => window.location.reload()} variant="outline">
-              Refresh Results
+              {t("refreshResults")}
             </Button>
           </div>
         )}
