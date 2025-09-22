@@ -181,9 +181,9 @@ const resources = {
       conversationFile: "ملف محادثة",
       
       // Satisfaction survey
-      satisfactionQuestion: "هل أنت راضٍ عن النتيجة؟",
-      yesSatisfied: "نعم، أنا راضٍ",
-      notSatisfied: "لا، لست راضٍ",
+      satisfactionQuestion: "هل انت\\انتي راضي عن النتيجة",
+      yesSatisfied: "نعم راضي",
+      notSatisfied: "غير راضي",
       
       // Common
       loading: "جارٍ التحميل...",
