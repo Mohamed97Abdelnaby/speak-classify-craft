@@ -9,9 +9,15 @@ import {
   Zap
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
+import { useState } from "react";
 
 const TranscriptionResults = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const [satisfactionResponse, setSatisfactionResponse] = useState<'satisfied' | 'not-satisfied' | null>(null);
+  const [verifiedCategory, setVerifiedCategory] = useState<string>("");
 
   // Mock data - this would come from the AI service
   const mockTranscription = "Hello, this is a sample transcription of the voice recording. The AI has processed the audio and converted it to text with high accuracy. This text will then be sent to the classification service to determine the appropriate category based on the user's predefined classes.";
@@ -63,6 +69,21 @@ const TranscriptionResults = () => {
       description: "Results have been downloaded as JSON file.",
     });
   };
+
+  const handleSatisfactionResponse = (response: 'satisfied' | 'not-satisfied') => {
+    setSatisfactionResponse(response);
+  };
+
+  const categories = [
+    "عميل متجاوب",
+    "عميل واعد", 
+    "عميل مماطل",
+    "عميل يستخدم التلاعب العاطفي والهجوم",
+    "عميل من رافض لمتجاوب",
+    "عميل غاضب ويتلفظ مسيء",
+    "عميل رافض",
+    "عميل لا يستطيع"
+  ];
 
   return (
     <div className="space-y-6">
@@ -165,6 +186,57 @@ const TranscriptionResults = () => {
               <Badge variant="secondary" className="bg-success text-success-foreground">
                 Complete
               </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Confirmation Classification - Only show if not satisfied or no response yet */}
+      {(satisfactionResponse === null || satisfactionResponse === 'not-satisfied') && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">تأكيد التصنيف</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Select
+              value={verifiedCategory}
+              onValueChange={setVerifiedCategory}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="اختر التصنيف" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map(category => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Satisfaction Survey */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
+            <div className="flex justify-center gap-4">
+              <Button
+                onClick={() => handleSatisfactionResponse('satisfied')}
+                className="bg-green-600 hover:bg-green-700 text-white"
+                variant={satisfactionResponse === 'satisfied' ? 'default' : 'outline'}
+              >
+                {t('yesSatisfied')}
+              </Button>
+              <Button
+                onClick={() => handleSatisfactionResponse('not-satisfied')}
+                className="bg-red-600 hover:bg-red-700 text-white"
+                variant={satisfactionResponse === 'not-satisfied' ? 'default' : 'outline'}
+              >
+                {t('notSatisfied')}
+              </Button>
             </div>
           </div>
         </CardContent>

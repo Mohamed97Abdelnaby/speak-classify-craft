@@ -180,6 +180,11 @@ const resources = {
       textConversationFilename: "محادثة-نص",
       conversationFile: "ملف محادثة",
       
+      // Satisfaction survey
+      satisfactionQuestion: "هل أنت راضٍ عن النتيجة؟",
+      yesSatisfied: "نعم، أنا راضٍ",
+      notSatisfied: "لا، لست راضٍ",
+      
       // Common
       loading: "جارٍ التحميل...",
       error: "خطأ",

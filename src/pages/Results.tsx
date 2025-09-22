@@ -21,6 +21,7 @@ const Results = () => {
   const [searchParams] = useSearchParams();
   const [files, setFiles] = useState<BatchFile[]>([]);
   const [activeTab, setActiveTab] = useState<string>("");
+  const [satisfactionAnswers, setSatisfactionAnswers] = useState<Record<string, 'satisfied' | 'not-satisfied' | null>>({});
   const { toast } = useToast();
   const batchId = searchParams.get('batch');
 
@@ -101,6 +102,13 @@ const Results = () => {
   const handleShare = () => {
     // TODO: Implement share functionality
     console.log("Share results");
+  };
+
+  const handleSatisfactionResponse = (fileId: string, response: 'satisfied' | 'not-satisfied') => {
+    setSatisfactionAnswers(prev => ({
+      ...prev,
+      [fileId]: response
+    }));
   };
   
   // Debt collection customer behavior categories
@@ -356,24 +364,26 @@ const Results = () => {
                       </div>
                     </div>
                     
-                    <div>
-                      <p className="text-sm font-medium mb-2">تأكيد التصنيف</p>
-                      <Select
-                        value={file.classification?.verified || file.classification?.aiClassification || file.classification?.predicted || ""}
-                        onValueChange={(value) => updateFileVerification(file.id, value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر التصنيف" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map(category => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {(satisfactionAnswers[file.id] === null || satisfactionAnswers[file.id] === undefined || satisfactionAnswers[file.id] === 'not-satisfied') && (
+                      <div>
+                        <p className="text-sm font-medium mb-2">تأكيد التصنيف</p>
+                        <Select
+                          value={file.classification?.verified || file.classification?.aiClassification || file.classification?.predicted || ""}
+                          onValueChange={(value) => updateFileVerification(file.id, value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر التصنيف" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map(category => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                     
                     {file.classification?.verified && (
                       <div className="p-3 bg-success/10 rounded-md">
@@ -388,6 +398,31 @@ const Results = () => {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Satisfaction Survey */}
+              <Card className="mt-6">
+                <CardContent className="pt-6">
+                  <div className="text-center space-y-4">
+                    <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
+                    <div className="flex justify-center gap-4">
+                      <Button
+                        onClick={() => handleSatisfactionResponse(file.id, 'satisfied')}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        variant={satisfactionAnswers[file.id] === 'satisfied' ? 'default' : 'outline'}
+                      >
+                        {t('yesSatisfied')}
+                      </Button>
+                      <Button
+                        onClick={() => handleSatisfactionResponse(file.id, 'not-satisfied')}
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                        variant={satisfactionAnswers[file.id] === 'not-satisfied' ? 'default' : 'outline'}
+                      >
+                        {t('notSatisfied')}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           ))}
         </Tabs>
