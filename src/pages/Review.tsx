@@ -50,9 +50,15 @@ const Review = () => {
   }, [batchId, navigate]);
 
   const handleClassifyAll = async () => {
+    console.log('=== CLASSIFICATION STARTED ===');
+    console.log('Batch ID:', batchId);
+    console.log('Total files:', files.length);
+    
     const completedFiles = files.filter(file => 
       file.status === 'completed' && file.transcription
     );
+
+    console.log('Completed files to classify:', completedFiles.length);
 
     if (completedFiles.length === 0) {
       toast({
@@ -64,6 +70,8 @@ const Review = () => {
     }
 
     setIsClassifying(true);
+    let successfulClassifications = 0;
+    let shouldNavigate = false;
 
     try {
       const updatedFiles = [...files];
@@ -77,9 +85,11 @@ const Review = () => {
           });
 
           if (error) {
-            console.error('Classification error:', error);
+            console.error('Classification error for file:', file.name, error);
             continue;
           }
+
+          console.log('Classification response for', file.name, ':', data);
 
           if (data.success) {
             const fileIndex = updatedFiles.findIndex(f => f.id === file.id);
@@ -94,6 +104,8 @@ const Review = () => {
                   confidence: 95
                 }
               };
+              successfulClassifications++;
+              console.log(`Successfully classified file: ${file.name}`);
             }
           }
         } catch (error) {
@@ -101,41 +113,65 @@ const Review = () => {
         }
       }
 
+      console.log('Classification loop completed. Successful classifications:', successfulClassifications);
       setFiles(updatedFiles);
 
       // Update storage
       if (batchId) {
-        const { setBatchData } = await import('@/utils/indexedDbStorage');
-        const { serializeBatchData } = await import('@/utils/fileSerializer');
-        
-        const batchData = {
-          id: batchId,
-          files: updatedFiles,
-          createdAt: new Date(),
-          status: 'completed' as const,
-        };
-        
-        const serializedBatchData = await serializeBatchData(batchData);
-        await setBatchData(batchId, serializedBatchData);
+        try {
+          console.log('Updating storage...');
+          const { setBatchData } = await import('@/utils/indexedDbStorage');
+          const { serializeBatchData } = await import('@/utils/fileSerializer');
+          
+          const batchData = {
+            id: batchId,
+            files: updatedFiles,
+            createdAt: new Date(),
+            status: 'completed' as const,
+          };
+          
+          const serializedBatchData = await serializeBatchData(batchData);
+          await setBatchData(batchId, serializedBatchData);
+          console.log('Storage updated successfully');
+        } catch (storageError) {
+          console.error('Storage update error:', storageError);
+          // Don't prevent navigation if storage fails
+        }
       }
+
+      // Mark that we should navigate regardless of errors
+      shouldNavigate = true;
 
       toast({
         title: "تم التصنيف",
-        description: "تم تصنيف المحادثات بنجاح",
+        description: `تم تصنيف ${successfulClassifications} محادثة بنجاح`,
       });
 
-      // Navigate to results page
-      navigate(`/results?batch=${batchId}`);
-
+      console.log('About to navigate to results page...');
+      
     } catch (error) {
-      console.error('Classification error:', error);
+      console.error('Classification process error:', error);
       toast({
         title: "خطأ في التصنيف",
         description: "حدث خطأ أثناء التصنيف",
         variant: "destructive",
       });
+      // Still allow navigation if we had some successful classifications
+      shouldNavigate = successfulClassifications > 0;
     } finally {
       setIsClassifying(false);
+      
+      // Ensure navigation happens outside the try-catch block
+      if (shouldNavigate && batchId) {
+        console.log('Navigating to results page with batch:', batchId);
+        // Use setTimeout to ensure state updates are complete
+        setTimeout(() => {
+          navigate(`/results?batch=${batchId}`);
+          console.log('Navigation command executed');
+        }, 100);
+      } else {
+        console.log('Navigation skipped. shouldNavigate:', shouldNavigate, 'batchId:', batchId);
+      }
     }
   };
 
