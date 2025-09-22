@@ -176,9 +176,8 @@ const TextClassifier = () => {
             className="min-h-[200px] resize-none"
             dir="rtl"
           />
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="flex justify-start text-xs text-muted-foreground">
             <span>{text.length} {t("characters")}</span>
-            <span>{t("maxCharacters")}: 10,000</span>
           </div>
         </div>
 
