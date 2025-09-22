@@ -268,7 +268,6 @@ const Review = () => {
                 <TableRow>
                   <TableHead className="text-right">اسم الملف</TableHead>
                   <TableHead className="text-right">ملخص المحادثة</TableHead>
-                  <TableHead className="text-right">التصنيف</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -282,17 +281,7 @@ const Review = () => {
                         {file.summary || file.transcription || 'لا يوجد نص متاح'}
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
-                      {file.classification?.aiClassification ? (
-                        <Badge variant="default" className="text-sm">
-                          {file.classification.aiClassification}
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="text-sm">
-                          غير مصنف
-                        </Badge>
-                      )}
-                    </TableCell>
+                    
                   </TableRow>
                 ))}
               </TableBody>
