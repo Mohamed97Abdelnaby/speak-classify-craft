@@ -220,29 +220,29 @@ const TranscriptionResults = () => {
       )}
 
       {/* Satisfaction Survey */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center space-y-4">
-            <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
-            <div className="flex justify-center gap-4">
-              <Button
-                onClick={() => handleSatisfactionResponse('satisfied')}
-                variant={satisfactionResponse === 'satisfied' ? 'default' : 'outline'}
-                className={satisfactionResponse === 'satisfied' ? 'bg-green-600 hover:bg-green-700 text-white' : ''}
-              >
-                {t('yesSatisfied')}
-              </Button>
-              <Button
-                onClick={() => handleSatisfactionResponse('not-satisfied')}
-                variant={satisfactionResponse === 'not-satisfied' ? 'default' : 'outline'}
-                className={satisfactionResponse === 'not-satisfied' ? 'bg-red-600 hover:bg-red-700 text-white' : ''}
-              >
-                {t('notSatisfied')}
-              </Button>
+      {!satisfactionResponse && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
+              <div className="flex justify-center gap-4">
+                <Button
+                  onClick={() => handleSatisfactionResponse('satisfied')}
+                  variant="outline"
+                >
+                  {t('yesSatisfied')}
+                </Button>
+                <Button
+                  onClick={() => handleSatisfactionResponse('not-satisfied')}
+                  variant="outline"
+                >
+                  {t('notSatisfied')}
+                </Button>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
