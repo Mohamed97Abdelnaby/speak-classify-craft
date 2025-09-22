@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,18 +13,25 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { getUserCategories, saveUserCategories } from "@/utils/categoryStorage";
 
 const CategoryManager = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [newCategory, setNewCategory] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState("");
 
+  useEffect(() => {
+    setCategories(getUserCategories());
+  }, []);
+
   const addCategory = () => {
     if (newCategory.trim() && !categories.includes(newCategory.trim())) {
-      setCategories([...categories, newCategory.trim()]);
+      const updatedCategories = [...categories, newCategory.trim()];
+      setCategories(updatedCategories);
+      saveUserCategories(updatedCategories);
       setNewCategory("");
       toast({
         title: t("success"),
@@ -40,8 +47,9 @@ const CategoryManager = () => {
   };
 
   const deleteCategory = (index: number) => {
-    const categoryName = categories[index];
-    setCategories(categories.filter((_, i) => i !== index));
+    const updatedCategories = categories.filter((_, i) => i !== index);
+    setCategories(updatedCategories);
+    saveUserCategories(updatedCategories);
     toast({
       title: t("success"),
       description: t("categoryDeleted"),
@@ -58,6 +66,7 @@ const CategoryManager = () => {
       const newCategories = [...categories];
       newCategories[editingIndex] = editingValue.trim();
       setCategories(newCategories);
+      saveUserCategories(newCategories);
       setEditingIndex(null);
       setEditingValue("");
       toast({

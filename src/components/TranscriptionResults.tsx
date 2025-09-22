@@ -11,13 +11,19 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getUserCategories } from "@/utils/categoryStorage";
 
 const TranscriptionResults = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [satisfactionResponse, setSatisfactionResponse] = useState<'satisfied' | 'not-satisfied' | null>(null);
   const [verifiedCategory, setVerifiedCategory] = useState<string>("");
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    setCategories(getUserCategories());
+  }, []);
 
   // Mock data - this would come from the AI service
   const mockTranscription = "Hello, this is a sample transcription of the voice recording. The AI has processed the audio and converted it to text with high accuracy. This text will then be sent to the classification service to determine the appropriate category based on the user's predefined classes.";
@@ -73,17 +79,6 @@ const TranscriptionResults = () => {
   const handleSatisfactionResponse = (response: 'satisfied' | 'not-satisfied') => {
     setSatisfactionResponse(response);
   };
-
-  const categories = [
-    "عميل متجاوب",
-    "عميل واعد", 
-    "عميل مماطل",
-    "عميل يستخدم التلاعب العاطفي والهجوم",
-    "عميل من رافض لمتجاوب",
-    "عميل غاضب ويتلفظ مسيء",
-    "عميل رافض",
-    "عميل لا يستطيع"
-  ];
 
   return (
     <div className="space-y-6">

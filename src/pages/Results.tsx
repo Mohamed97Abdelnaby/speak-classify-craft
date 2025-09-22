@@ -14,6 +14,7 @@ import { BatchFile } from "@/types/batch";
 import { getBatchData } from "@/utils/indexedDbStorage";
 import { deserializeBatchData } from "@/utils/fileSerializer";
 import { useTranslation } from "react-i18next";
+import { getUserCategories } from "@/utils/categoryStorage";
 
 const Results = () => {
   const { t } = useTranslation();
@@ -22,8 +23,13 @@ const Results = () => {
   const [files, setFiles] = useState<BatchFile[]>([]);
   const [activeTab, setActiveTab] = useState<string>("");
   const [satisfactionAnswers, setSatisfactionAnswers] = useState<Record<string, 'satisfied' | 'not-satisfied' | null>>({});
+  const [categories, setCategories] = useState<string[]>([]);
   const { toast } = useToast();
   const batchId = searchParams.get('batch');
+
+  useEffect(() => {
+    setCategories(getUserCategories());
+  }, []);
 
   useEffect(() => {
     // Load batch data
@@ -110,18 +116,6 @@ const Results = () => {
       [fileId]: response
     }));
   };
-  
-  // Debt collection customer behavior categories
-  const categories = [
-    "عميل متجاوب",
-    "عميل واعد", 
-    "عميل مماطل",
-    "عميل يستخدم التلاعب العاطفي والهجوم",
-    "عميل من رافض لمتجاوب",
-    "عميل غاضب ويتلفظ مسيء",
-    "عميل رافض",
-    "عميل لا يستطيع"
-  ];
   
   // If no batch data, show single file results (legacy)
   if (!batchId || files.length === 0) {
