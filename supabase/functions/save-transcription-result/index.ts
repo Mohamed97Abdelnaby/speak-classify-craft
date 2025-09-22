@@ -72,11 +72,16 @@ serve(async (req) => {
         })
         .eq('file_id', requestData.file_id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating satisfaction:', error);
         throw error;
+      }
+
+      if (!data) {
+        console.error('No record found with file_id:', requestData.file_id);
+        throw new Error(`No transcription record found with file_id: ${requestData.file_id}`);
       }
 
       console.log('Updated satisfaction for file:', requestData.file_id);
@@ -97,11 +102,16 @@ serve(async (req) => {
         })
         .eq('file_id', requestData.file_id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating verification:', error);
         throw error;
+      }
+
+      if (!data) {
+        console.error('No record found with file_id:', requestData.file_id);
+        throw new Error(`No transcription record found with file_id: ${requestData.file_id}`);
       }
 
       console.log('Updated verification for file:', requestData.file_id);
