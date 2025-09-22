@@ -1,7 +1,6 @@
 import Navigation from "@/components/Navigation";
-import VoiceRecorder from "@/components/VoiceRecorder";
 import CategoryManager from "@/components/CategoryManager";
-import TextClassifier from "@/components/TextClassifier";
+import UnifiedProcessor from "@/components/UnifiedProcessor";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mic, Settings, Zap, MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -80,25 +79,16 @@ const Voice = () => {
 
         {/* Main Content */}
         <div className="space-y-8">
-          {/* Audio and Text Input Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Voice Input Section */}
-            <div>
-              <h2 className="text-2xl font-semibold text-foreground mb-4">{t("audioInput")}</h2>
-              <VoiceRecorder />
-            </div>
-
-            {/* Text Input Section */}
-            <div>
-              <h2 className="text-2xl font-semibold text-foreground mb-4">{t("textInput")}</h2>
-              <TextClassifier />
-            </div>
+          {/* Category Management Section - Priority */}
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-semibold text-foreground mb-6 text-center">{t("classificationCategories")}</h2>
+            <CategoryManager />
           </div>
 
-          {/* Category Management Section */}
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-semibold text-foreground mb-4 text-center">{t("classificationCategories")}</h2>
-            <CategoryManager />
+          {/* Unified Input and Processing Section */}
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-2xl font-semibold text-foreground mb-6 text-center">إدخال ومعالجة البيانات</h2>
+            <UnifiedProcessor />
           </div>
         </div>
       </main>
