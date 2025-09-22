@@ -84,8 +84,8 @@ const TextClassifier = () => {
         description: t("classificationCompleted"),
       });
 
-      // Navigate to results page
-      navigate('/results');
+      // Navigate to results page with batch ID
+      navigate(`/results?batch=${batchData.id}`);
 
     } catch (error) {
       console.error('Text classification error:', error);

@@ -11,6 +11,8 @@ import { ArrowLeft, Download, Share2, RotateCcw, CheckCircle, FileText } from "l
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { BatchFile } from "@/types/batch";
+import { getBatchData } from "@/utils/indexedDbStorage";
+import { deserializeBatchData } from "@/utils/fileSerializer";
 
 const Results = () => {
   const navigate = useNavigate();
@@ -22,19 +24,28 @@ const Results = () => {
 
   useEffect(() => {
     // Load batch data
-    if (batchId) {
-      const batchData = localStorage.getItem(`batch-${batchId}`);
-      if (batchData) {
-        const batch = JSON.parse(batchData);
-        const completedFiles = batch.files || [];
-        setFiles(completedFiles);
-        if (completedFiles.length > 0) {
-          setActiveTab(completedFiles[0].id);
+    const loadBatchData = async () => {
+      if (batchId) {
+        try {
+          const serializedBatchData = await getBatchData(batchId);
+          if (serializedBatchData) {
+            const batchData = await deserializeBatchData(serializedBatchData);
+            const completedFiles = batchData.files || [];
+            setFiles(completedFiles);
+            if (completedFiles.length > 0) {
+              setActiveTab(completedFiles[0].id);
+            }
+          } else {
+            navigate("/");
+          }
+        } catch (error) {
+          console.error('Error loading batch data:', error);
+          navigate("/");
         }
-      } else {
-        navigate("/");
       }
-    }
+    };
+    
+    loadBatchData();
   }, [batchId, navigate]);
 
   const updateFileVerification = (fileId: string, verifiedCategory: string) => {
