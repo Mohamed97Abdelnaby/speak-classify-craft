@@ -141,26 +141,11 @@ const Results = () => {
     let finalClassification: string;
     
     if (response === 'satisfied') {
-      // User is satisfied with AI classification
-      finalClassification = file.classification.aiClassification || file.classification.predicted || '';
-      
-      // Save final classification immediately
-      const result = await updateFinalClassification(fileId, finalClassification, response);
-      
-      if (!result.success) {
-        console.error('Error saving final classification:', result.error);
-        toast({
-          title: "خطأ",
-          description: "فشل في حفظ التصنيف النهائي",
-          variant: "destructive"
-        });
-      } else {
-        console.log('Final classification saved successfully');
-        toast({
-          title: t("success"),
-          description: "تم حفظ التصنيف بنجاح",
-        });
-      }
+      // User is satisfied with AI classification - only show UI feedback, don't save to database
+      toast({
+        title: t("success"),
+        description: "شكرًا لك! تم تأكيد التصنيف",
+      });
     }
     // If not satisfied, don't save yet - wait for user to select category
   };
