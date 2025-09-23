@@ -135,7 +135,17 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
 
   const handleTextFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    addTextFiles(files);
+    const textFiles = files.filter(file => isTextFile(file));
+    const docxFiles = files.filter(file => isDocxFile(file));
+    
+    if (textFiles.length > 0) {
+      addTextFiles(textFiles);
+    }
+    
+    if (docxFiles.length > 0) {
+      addDocxFiles(docxFiles);
+    }
+    
     // Clear the input value to allow re-uploading the same file
     if (textFileInputRef.current) {
       textFileInputRef.current.value = '';
@@ -145,7 +155,8 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
   const addFiles = (files: File[]) => {
     const audioFiles = files.filter(file => file.type.startsWith('audio/'));
     const textFiles = files.filter(file => isTextFile(file));
-    const validFiles = [...audioFiles, ...textFiles];
+    const docxFiles = files.filter(file => isDocxFile(file));
+    const validFiles = [...audioFiles, ...textFiles, ...docxFiles];
     const invalidFiles = files.length - validFiles.length;
     
     if (invalidFiles > 0) {
@@ -159,6 +170,11 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
     // Handle text files separately
     if (textFiles.length > 0) {
       addTextFiles(textFiles);
+    }
+    
+    // Handle .docx files separately
+    if (docxFiles.length > 0) {
+      addDocxFiles(docxFiles);
     }
     
     // Handle audio files as before
@@ -194,6 +210,12 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
            file.type === 'application/json' ||
            file.type === 'application/xml' ||
            textExtensions.some(ext => fileName.endsWith(ext));
+  };
+
+  const isDocxFile = (file: File) => {
+    const fileName = file.name.toLowerCase();
+    return file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
+           fileName.endsWith('.docx');
   };
 
   const addTextFiles = async (files: File[]) => {
@@ -282,6 +304,69 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
       };
       reader.onerror = () => reject(new Error('File reading failed'));
       reader.readAsText(file, 'UTF-8');
+    });
+  };
+
+  const addDocxFiles = async (files: File[]) => {
+    if (files.length === 0) return;
+
+    // Check file sizes (limit to 20MB per file for documents)
+    const oversizedFiles = files.filter(file => file.size > 20 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+      toast({
+        title: t("error"),
+        description: `${oversizedFiles.length} ملف كبير جداً (أكثر من 20 ميجابايت) تم تجاهله`,
+        variant: "destructive",
+      });
+    }
+
+    const validFiles = files.filter(file => file.size <= 20 * 1024 * 1024);
+    
+    setIsLoadingTextFiles(true);
+    
+    // Add files to tracking state
+    const fileEntries = validFiles.map(file => ({
+      id: `docx-${Date.now()}-${Math.random()}`,
+      name: file.name,
+      size: file.size,
+      status: 'loading' as const
+    }));
+    
+    setUploadedTextFiles(prev => [...prev, ...fileEntries]);
+
+    // Process files - for now, show as loaded but inform user about manual processing
+    for (let i = 0; i < validFiles.length; i++) {
+      const file = validFiles[i];
+      const entry = fileEntries[i];
+      
+      try {
+        // Update file status to loaded
+        setUploadedTextFiles(prev => prev.map(f => 
+          f.id === entry.id ? { ...f, status: 'loaded' } : f
+        ));
+        
+        // Add placeholder content to text area with file header
+        setText(prev => {
+          const separator = prev ? '\n\n' : '';
+          const header = `--- ${file.name} (DOCX) ---\n`;
+          const placeholder = `[تم رفع ملف DOCX: ${file.name}]\n[يرجى نسخ ولصق المحتوى من الملف هنا يدوياً]\n`;
+          return prev + separator + header + placeholder;
+        });
+        
+      } catch (error) {
+        console.error(`Failed to process DOCX file ${file.name}:`, error);
+        setUploadedTextFiles(prev => prev.map(f => 
+          f.id === entry.id ? { ...f, status: 'error' } : f
+        ));
+      }
+    }
+
+    setIsLoadingTextFiles(false);
+    
+    const successCount = validFiles.length;
+    toast({
+      title: t("success"),
+      description: `تم رفع ${successCount} ملف DOCX بنجاح. يرجى نسخ المحتوى يدوياً إلى منطقة النص`,
     });
   };
 
@@ -546,7 +631,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
             <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="font-medium mb-2">{t("dragDropFiles")}</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {t("supportedFormats")}
+              {t("supportedFormats")} + DOCX
             </p>
             <Button
               onClick={() => fileInputRef.current?.click()}
@@ -562,7 +647,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
             ref={fileInputRef}
             type="file"
             multiple
-            accept="audio/*"
+            accept="audio/*,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             onChange={handleFileUpload}
             className="hidden"
           />
@@ -727,7 +812,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
             ref={textFileInputRef}
             type="file"
             multiple
-            accept=".txt,.md,.rtf,.csv,.json,.xml,.yml,.yaml,.log,.ini,.cfg,.conf,.sql,.py,.js,.html,.css,.scss,.ts,.tsx,.jsx,.vue,.php,.rb,.go,.rs,.java,.cpp,.c,.h,.sh,.bat,.ps1,text/*,application/json,application/xml"
+            accept=".txt,.md,.rtf,.csv,.json,.xml,.yml,.yaml,.log,.ini,.cfg,.conf,.sql,.py,.js,.html,.css,.scss,.ts,.tsx,.jsx,.vue,.php,.rb,.go,.rs,.java,.cpp,.c,.h,.sh,.bat,.ps1,.docx,text/*,application/json,application/xml,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             onChange={handleTextFileUpload}
             className="hidden"
           />
