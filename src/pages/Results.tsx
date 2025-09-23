@@ -446,8 +446,8 @@ const Results = () => {
                       </div>
                     )}
 
-                    {/* Confirmation Classification - Only show when user is not satisfied and hasn't chosen a category yet */}
-                    {satisfactionAnswers[file.id] === 'not-satisfied' && !file.classification?.verified && (
+                    {/* Confirmation Classification - Only show when user is not satisfied */}
+                    {satisfactionAnswers[file.id] === 'not-satisfied' && (
                       <div className="space-y-3">
                         <div>
                           <p className="text-sm font-medium mb-2">{t('confirmationClassification')}</p>
