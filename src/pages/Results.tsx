@@ -29,7 +29,9 @@ const Results = () => {
   const batchId = searchParams.get('batch');
 
   useEffect(() => {
-    setCategories(getUserCategories());
+    const loadedCategories = getUserCategories();
+    console.log('Loading categories in Results page:', loadedCategories);
+    setCategories(loadedCategories);
   }, []);
 
   useEffect(() => {

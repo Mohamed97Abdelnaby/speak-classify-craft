@@ -24,7 +24,9 @@ const TranscriptionResults = () => {
   const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    setCategories(getUserCategories());
+    const loadedCategories = getUserCategories();
+    console.log('Loading categories in TranscriptionResults:', loadedCategories);
+    setCategories(loadedCategories);
   }, []);
 
   // Mock data - this would come from the AI service
