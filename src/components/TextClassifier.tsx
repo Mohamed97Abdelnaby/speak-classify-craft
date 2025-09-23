@@ -97,23 +97,7 @@ const TextClassifier = () => {
       const serializedData = await serializeBatchData(batchData);
       await setBatchData(batchData.id, serializedData);
       
-      // Save transcription result to database
-      try {
-        await saveTranscriptionResult({
-          file_name: textFile.name,
-          file_size: textFile.file.size,
-          transcription_text: text,
-          summary: summary,
-          ai_classification: data.classification,
-          ai_confidence: 1,
-          batch_id: batchData.id,
-          file_id: textFile.id
-        });
-        console.log('Text classification saved to database:', textFile.id);
-      } catch (dbError) {
-        console.error('Failed to save text classification to database:', dbError);
-        // Continue with navigation even if database save fails - user can still see results
-      }
+      // Data will only be saved to database if user is unsatisfied with results
       
       toast({
         title: t("success"),

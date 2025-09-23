@@ -121,27 +121,7 @@ const Processing = () => {
           completedCount++;
           setProcessedCount(completedCount);
 
-          // Save transcription result to database
-          try {
-            const saveResult = await saveTranscriptionResult({
-              file_name: file.name,
-              file_size: file.file.size,
-              transcription_text: result.text,
-              summary: updatedFiles[i].summary,
-              ai_classification: updatedFiles[i].classification?.aiClassification || 'غير مصنف',
-              ai_confidence: updatedFiles[i].classification?.confidence,
-              batch_id: batchId!,
-              file_id: file.id
-            });
-
-            if (saveResult.success) {
-              console.log(`Transcription result saved to database for ${file.name}`);
-            } else {
-              console.error(`Failed to save transcription result for ${file.name}:`, saveResult.error);
-            }
-          } catch (saveError) {
-            console.error(`Error saving transcription result for ${file.name}:`, saveError);
-          }
+          // Data will only be saved to database if user is unsatisfied with results
         } else {
           console.error(`Transcription failed for ${file.name}:`, result.error);
           // Mark as completed but with no transcription (so it won't show in results)

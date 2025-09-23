@@ -293,21 +293,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
 
         batchFiles.push(textFile);
 
-        // Save text classification to database
-        try {
-          await saveTranscriptionResult({
-            file_name: textFile.name,
-            file_size: textFile.file.size,
-            transcription_text: text,
-            summary: summary,
-            ai_classification: classifyResponse.data.classification,
-            ai_confidence: 1,
-            batch_id: batchId,
-            file_id: textFile.id
-          });
-        } catch (dbError) {
-          console.error('Failed to save text classification to database:', dbError);
-        }
+        // Data will only be saved to database if user is unsatisfied with results
       }
 
       // Process audio files if available
