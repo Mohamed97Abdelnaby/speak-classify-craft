@@ -21,7 +21,7 @@ const TranscriptionResults = () => {
   const { t } = useTranslation();
   const [satisfactionResponse, setSatisfactionResponse] = useState<'satisfied' | 'not-satisfied' | null>(null);
   const [verifiedCategory, setVerifiedCategory] = useState<string>("");
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<string[]>(getUserCategories());
 
   useEffect(() => {
     const loadedCategories = getUserCategories();
@@ -33,11 +33,11 @@ const TranscriptionResults = () => {
   const mockTranscription = "Hello, this is a sample transcription of the voice recording. The AI has processed the audio and converted it to text with high accuracy. This text will then be sent to the classification service to determine the appropriate category based on the user's predefined classes.";
   
   const mockClassification = {
-    category: "Business Meeting",
+    category: "عميل متجاوب",
     confidence: 0.92,
     alternativeCategories: [
-      { name: "Project Discussion", confidence: 0.78 },
-      { name: "Client Call", confidence: 0.65 }
+      { name: "عميل واعد", confidence: 0.78 },
+      { name: "عميل مماطل", confidence: 0.65 }
     ]
   };
 
@@ -242,41 +242,34 @@ const TranscriptionResults = () => {
             <CardTitle className="text-lg">{t('confirmationClassification')}</CardTitle>
           </CardHeader>
           <CardContent>
-            {categories.length === 0 ? (
-              <div className="text-center py-6 text-muted-foreground">
-                <p className="mb-2">لا توجد فئات متاحة</p>
-                <p className="text-sm">يرجى إضافة فئات في إعدادات التصنيف أولاً</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <Select
-                  value={verifiedCategory}
-                  onValueChange={setVerifiedCategory}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر التصنيف الصحيح" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                {verifiedCategory && (
-                  <div className="mt-2 p-2 bg-primary/10 rounded-md">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="w-3 h-3 text-primary" />
-                      <span className="text-xs text-primary">
-                        تم اختيار التصنيف المصحح: {verifiedCategory}
-                      </span>
-                    </div>
+            <div className="space-y-3">
+              <Select
+                value={verifiedCategory}
+                onValueChange={setVerifiedCategory}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر التصنيف الصحيح" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(category => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {verifiedCategory && (
+                <div className="mt-2 p-2 bg-primary/10 rounded-md">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-3 h-3 text-primary" />
+                    <span className="text-xs text-primary">
+                      تم اختيار التصنيف المصحح: {verifiedCategory}
+                    </span>
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
