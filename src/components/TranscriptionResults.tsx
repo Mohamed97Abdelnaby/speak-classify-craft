@@ -6,7 +6,8 @@ import {
   Copy, 
   Download,
   Clock,
-  Zap
+  Zap,
+  CheckCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -87,32 +88,32 @@ const TranscriptionResults = () => {
 
   return (
     <div className="space-y-6">
-      {/* Classification Results */}
-      <Card className="border-success/20 bg-success/5">
+      {/* AI Classification - Always visible */}
+      <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-success">
+          <CardTitle className="flex items-center space-x-2 text-primary">
             <Zap className="w-5 h-5" />
-            <span>Classification Result</span>
+            <span>{t('aiClassification')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <Badge 
               variant="secondary" 
-              className="text-lg px-4 py-2 bg-success text-success-foreground"
+              className="text-lg px-4 py-2 bg-primary/10 text-primary border-primary/20"
             >
               {mockClassification.category}
             </Badge>
             <div className="text-right">
-              <div className="text-2xl font-bold text-success">
+              <div className="text-2xl font-bold text-primary">
                 {Math.round(mockClassification.confidence * 100)}%
               </div>
-              <div className="text-sm text-muted-foreground">Confidence</div>
+              <div className="text-sm text-muted-foreground">الثقة</div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-muted-foreground">Alternative Categories</h4>
+            <h4 className="text-sm font-medium text-muted-foreground">الفئات البديلة</h4>
             <div className="flex flex-wrap gap-2">
               {mockClassification.alternativeCategories.map((alt, index) => (
                 <Badge key={index} variant="outline" className="text-xs">
@@ -191,11 +192,52 @@ const TranscriptionResults = () => {
         </CardContent>
       </Card>
 
+      {/* Satisfaction Survey */}
+      {!satisfactionResponse && (
+        <Card className="border-2 border-dashed border-primary/30">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
+              <div className="flex justify-center gap-4">
+                <Button
+                  onClick={() => handleSatisfactionResponse('satisfied')}
+                  variant="outline"
+                  className="hover:bg-success/10 hover:border-success hover:text-success"
+                >
+                  {t('yesSatisfied')}
+                </Button>
+                <Button
+                  onClick={() => handleSatisfactionResponse('not-satisfied')}
+                  variant="outline"
+                  className="hover:bg-destructive/10 hover:border-destructive hover:text-destructive"
+                >
+                  {t('notSatisfied')}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Show satisfaction result */}
+      {satisfactionResponse === 'satisfied' && (
+        <Card className="border-success/20 bg-success/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-center space-x-2">
+              <CheckCircle className="w-4 h-4 text-success" />
+              <span className="text-success font-medium">
+                تم الموافقة على تصنيف الذكاء الاصطناعي
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Confirmation Classification - Only show if not satisfied */}
       {satisfactionResponse === 'not-satisfied' && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">تأكيد التصنيف</CardTitle>
+            <CardTitle className="text-lg">{t('confirmationClassification')}</CardTitle>
           </CardHeader>
           <CardContent>
             {categories.length === 0 ? (
@@ -204,47 +246,35 @@ const TranscriptionResults = () => {
                 <p className="text-sm">يرجى إضافة فئات في إعدادات التصنيف أولاً</p>
               </div>
             ) : (
-              <Select
-                value={verifiedCategory}
-                onValueChange={setVerifiedCategory}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر التصنيف" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Satisfaction Survey */}
-      {!satisfactionResponse && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
-              <div className="flex justify-center gap-4">
-                <Button
-                  onClick={() => handleSatisfactionResponse('satisfied')}
-                  variant="outline"
+              <div className="space-y-3">
+                <Select
+                  value={verifiedCategory}
+                  onValueChange={setVerifiedCategory}
                 >
-                  {t('yesSatisfied')}
-                </Button>
-                <Button
-                  onClick={() => handleSatisfactionResponse('not-satisfied')}
-                  variant="outline"
-                >
-                  {t('notSatisfied')}
-                </Button>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر التصنيف الصحيح" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(category => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {verifiedCategory && (
+                  <div className="mt-2 p-2 bg-primary/10 rounded-md">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-3 h-3 text-primary" />
+                      <span className="text-xs text-primary">
+                        تم اختيار التصنيف المصحح: {verifiedCategory}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       )}

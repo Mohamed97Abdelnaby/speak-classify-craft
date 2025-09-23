@@ -181,9 +181,11 @@ const resources = {
       conversationFile: "ملف محادثة",
       
       // Satisfaction survey
-      satisfactionQuestion: "هل انت\\انتي راضي عن النتيجة",
-      yesSatisfied: "نعم راضي",
-      notSatisfied: "غير راضي",
+      satisfactionQuestion: "هل أنت راضي عن النتيجة؟",
+      yesSatisfied: "نعم، أنا راضي",
+      notSatisfied: "لا، أنا غير راضي",
+      aiClassification: "التصنيف الذكي",
+      confirmationClassification: "التصنيف المؤكد",
       
       // Common
       loading: "جارٍ التحميل...",

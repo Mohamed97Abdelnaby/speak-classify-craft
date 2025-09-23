@@ -387,67 +387,76 @@ const Results = () => {
                     <CardTitle className="text-lg">التصنيف</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {categories.length === 0 ? (
-                      <div className="text-center py-6 text-muted-foreground">
-                        <p className="mb-2">لا توجد فئات متاحة</p>
-                        <p className="text-sm">يرجى إضافة فئات في إعدادات التصنيف أولاً</p>
+                    {/* Always show AI Classification */}
+                    <div>
+                      <p className="text-sm font-medium mb-2">{t('aiClassification')}</p>
+                      <div className="flex items-center space-x-2">
+                        <Badge 
+                          variant="secondary" 
+                          className="bg-primary/10 text-primary border-primary/20"
+                        >
+                          {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
+                        </Badge>
+                        {file.classification?.confidence && (
+                          <span className="text-xs text-muted-foreground">
+                            الثقة: {Math.round(file.classification.confidence * 100)}%
+                          </span>
+                        )}
                       </div>
-                    ) : (
-                      <>
-                        <div>
-                          <p className="text-sm font-medium mb-2">التصنيف النهائي</p>
-                          <div className="flex items-center space-x-2">
-                            <Badge 
-                              variant={satisfactionAnswers[file.id] === 'satisfied' ? "default" : file.classification?.verified ? "secondary" : "outline"}
-                              className={
-                                satisfactionAnswers[file.id] === 'satisfied' 
-                                  ? "bg-success/10 text-success border-success/20" 
-                                  : file.classification?.verified 
-                                    ? "bg-primary/10 text-primary border-primary/20"
-                                    : "bg-muted/10 text-muted-foreground border-muted/20"
-                              }
-                            >
-                              {
-                                satisfactionAnswers[file.id] === 'satisfied' 
-                                  ? (file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد')
-                                  : file.classification?.verified 
-                                    ? file.classification.verified
-                                    : (file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد')
-                              }
-                            </Badge>
-                            {file.classification?.classificationTimestamp && (
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(file.classification.classificationTimestamp).toLocaleString('ar-SA')}
-                              </span>
-                            )}
+                    </div>
+
+                    {/* Satisfaction Survey */}
+                    {!satisfactionAnswers[file.id] && (
+                      <Card className="border-2 border-dashed border-primary/30">
+                        <CardContent className="pt-6">
+                          <div className="text-center space-y-4">
+                            <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
+                            <div className="flex justify-center gap-4">
+                              <Button
+                                onClick={() => handleSatisfactionResponse(file.id, 'satisfied')}
+                                variant="outline"
+                                className="hover:bg-success/10 hover:border-success hover:text-success"
+                              >
+                                {t('yesSatisfied')}
+                              </Button>
+                              <Button
+                                onClick={() => handleSatisfactionResponse(file.id, 'not-satisfied')}
+                                variant="outline"
+                                className="hover:bg-destructive/10 hover:border-destructive hover:text-destructive"
+                              >
+                                {t('notSatisfied')}
+                              </Button>
+                            </div>
                           </div>
-                          {satisfactionAnswers[file.id] === 'satisfied' && (
-                            <div className="mt-2 p-2 bg-success/10 rounded-md">
-                              <div className="flex items-center space-x-2">
-                                <CheckCircle className="w-3 h-3 text-success" />
-                                <span className="text-xs text-success">
-                                  تم الموافقة على تصنيف الذكي الاصطناعي
-                                </span>
-                              </div>
-                            </div>
-                          )}
-                          {file.classification?.verified && satisfactionAnswers[file.id] === 'not-satisfied' && (
-                            <div className="mt-2 p-2 bg-primary/10 rounded-md">
-                              <div className="flex items-center space-x-2">
-                                <CheckCircle className="w-3 h-3 text-primary" />
-                                <span className="text-xs text-primary">
-                                  تم التصحيح بواسطة المستخدم
-                                </span>
-                              </div>
-                            </div>
-                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Show satisfaction result */}
+                    {satisfactionAnswers[file.id] === 'satisfied' && (
+                      <div className="mt-2 p-2 bg-success/10 rounded-md">
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle className="w-3 h-3 text-success" />
+                          <span className="text-xs text-success">
+                            تم الموافقة على تصنيف الذكاء الاصطناعي
+                          </span>
                         </div>
-                        
-                        {satisfactionAnswers[file.id] === 'not-satisfied' && !file.classification?.verified && (
-                          <div>
-                            <p className="text-sm font-medium mb-2">تصحيح التصنيف</p>
+                      </div>
+                    )}
+
+                    {/* Confirmation Classification - Only show when user is not satisfied */}
+                    {satisfactionAnswers[file.id] === 'not-satisfied' && (
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium mb-2">{t('confirmationClassification')}</p>
+                          {categories.length === 0 ? (
+                            <div className="text-center py-4 text-muted-foreground">
+                              <p className="mb-2">لا توجد فئات متاحة</p>
+                              <p className="text-sm">يرجى إضافة فئات في إعدادات التصنيف أولاً</p>
+                            </div>
+                          ) : (
                             <Select
-                              value=""
+                              value={file.classification?.verified || ""}
                               onValueChange={(value) => updateFileVerification(file.id, value)}
                             >
                               <SelectTrigger>
@@ -461,39 +470,24 @@ const Results = () => {
                                 ))}
                               </SelectContent>
                             </Select>
+                          )}
+                        </div>
+                        
+                        {file.classification?.verified && (
+                          <div className="mt-2 p-2 bg-primary/10 rounded-md">
+                            <div className="flex items-center space-x-2">
+                              <CheckCircle className="w-3 h-3 text-primary" />
+                              <span className="text-xs text-primary">
+                                تم تأكيد التصنيف المصحح: {file.classification.verified}
+                              </span>
+                            </div>
                           </div>
                         )}
-                        
-                      </>
+                      </div>
                     )}
                   </CardContent>
                 </Card>
               </div>
-
-              {/* Satisfaction Survey */}
-              {!satisfactionAnswers[file.id] && (
-                <Card className="mt-6">
-                  <CardContent className="pt-6">
-                    <div className="text-center space-y-4">
-                      <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
-                      <div className="flex justify-center gap-4">
-                        <Button
-                          onClick={() => handleSatisfactionResponse(file.id, 'satisfied')}
-                          variant="outline"
-                        >
-                          {t('yesSatisfied')}
-                        </Button>
-                        <Button
-                          onClick={() => handleSatisfactionResponse(file.id, 'not-satisfied')}
-                          variant="outline"
-                        >
-                          {t('notSatisfied')}
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
             </TabsContent>
           ))}
         </Tabs>
