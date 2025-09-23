@@ -159,7 +159,7 @@ const Results = () => {
       //     description: "تم حفظ التصنيف بنجاح",
       //   });
       // }
-      continue;
+      return;
     }
     // If not satisfied, don't save yet - wait for user to select category
   };
