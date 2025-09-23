@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
-import { getUserCategories } from "@/utils/categoryStorage";
+import { getUserCategories, resetToDefaultCategories } from "@/utils/categoryStorage";
 import { supabase } from "@/integrations/supabase/client";
 
 const TranscriptionResults = () => {
@@ -21,12 +21,13 @@ const TranscriptionResults = () => {
   const { t } = useTranslation();
   const [satisfactionResponse, setSatisfactionResponse] = useState<'satisfied' | 'not-satisfied' | null>(null);
   const [verifiedCategory, setVerifiedCategory] = useState<string>("");
-  const [categories, setCategories] = useState<string[]>(getUserCategories());
+  const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    const loadedCategories = getUserCategories();
-    console.log('Loading categories in TranscriptionResults:', loadedCategories);
-    setCategories(loadedCategories);
+    // Reset categories to ensure we have the proper 8 debt collection categories
+    const resetCategories = resetToDefaultCategories();
+    console.log('Reset categories in TranscriptionResults:', resetCategories);
+    setCategories(resetCategories);
   }, []);
 
   // Mock data - this would come from the AI service
