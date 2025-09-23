@@ -47,6 +47,8 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
   
   // Text input states
   const [text, setText] = useState("");
+  const [uploadedTextFiles, setUploadedTextFiles] = useState<{id: string, name: string, size: number, status: 'loading' | 'loaded' | 'error'}[]>([]);
+  const [isLoadingTextFiles, setIsLoadingTextFiles] = useState(false);
   
   // Processing states
   const [isProcessing, setIsProcessing] = useState(false);
@@ -133,7 +135,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
 
   const handleTextFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    addFiles(files);
+    addTextFiles(files);
     // Clear the input value to allow re-uploading the same file
     if (textFileInputRef.current) {
       textFileInputRef.current.value = '';
@@ -142,12 +144,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
 
   const addFiles = (files: File[]) => {
     const audioFiles = files.filter(file => file.type.startsWith('audio/'));
-    const textFiles = files.filter(file => 
-      file.type.startsWith('text/') || 
-      file.name.toLowerCase().endsWith('.txt') ||
-      file.name.toLowerCase().endsWith('.md') ||
-      file.name.toLowerCase().endsWith('.rtf')
-    );
+    const textFiles = files.filter(file => isTextFile(file));
     const validFiles = [...audioFiles, ...textFiles];
     const invalidFiles = files.length - validFiles.length;
     
@@ -159,19 +156,10 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
       });
     }
     
-    // Handle text files - read their content
-    textFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        setText(prev => prev + (prev ? '\n\n' : '') + content);
-        toast({
-          title: t("success"),
-          description: `تم تحميل محتوى الملف: ${file.name}`,
-        });
-      };
-      reader.readAsText(file);
-    });
+    // Handle text files separately
+    if (textFiles.length > 0) {
+      addTextFiles(textFiles);
+    }
     
     // Handle audio files as before
     const newBatchFiles: BatchFile[] = audioFiles.map(file => ({
@@ -191,6 +179,110 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
         description: `تم إضافة ${audioFiles.length} ملف صوتي بنجاح`,
       });
     }
+  };
+
+  const isTextFile = (file: File) => {
+    const textExtensions = [
+      '.txt', '.md', '.rtf', '.csv', '.json', '.xml', '.yml', '.yaml', 
+      '.log', '.ini', '.cfg', '.conf', '.sql', '.py', '.js', '.html', 
+      '.css', '.scss', '.ts', '.tsx', '.jsx', '.vue', '.php', '.rb', 
+      '.go', '.rs', '.java', '.cpp', '.c', '.h', '.sh', '.bat', '.ps1'
+    ];
+    
+    const fileName = file.name.toLowerCase();
+    return file.type.startsWith('text/') || 
+           file.type === 'application/json' ||
+           file.type === 'application/xml' ||
+           textExtensions.some(ext => fileName.endsWith(ext));
+  };
+
+  const addTextFiles = async (files: File[]) => {
+    const validTextFiles = files.filter(file => isTextFile(file));
+    
+    if (validTextFiles.length === 0) {
+      toast({
+        title: t("error"),
+        description: "لم يتم العثور على ملفات نصية صالحة",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check file sizes (limit to 5MB per file)
+    const oversizedFiles = validTextFiles.filter(file => file.size > 5 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+      toast({
+        title: t("error"),
+        description: `${oversizedFiles.length} ملف كبير جداً (أكثر من 5 ميجابايت) تم تجاهله`,
+        variant: "destructive",
+      });
+    }
+
+    const validFiles = validTextFiles.filter(file => file.size <= 5 * 1024 * 1024);
+    
+    setIsLoadingTextFiles(true);
+    
+    // Add files to tracking state
+    const fileEntries = validFiles.map(file => ({
+      id: `text-${Date.now()}-${Math.random()}`,
+      name: file.name,
+      size: file.size,
+      status: 'loading' as const
+    }));
+    
+    setUploadedTextFiles(prev => [...prev, ...fileEntries]);
+
+    // Process files
+    for (let i = 0; i < validFiles.length; i++) {
+      const file = validFiles[i];
+      const entry = fileEntries[i];
+      
+      try {
+        const content = await readFileAsText(file);
+        
+        // Update file status
+        setUploadedTextFiles(prev => prev.map(f => 
+          f.id === entry.id ? { ...f, status: 'loaded' } : f
+        ));
+        
+        // Add content to text area with file header
+        setText(prev => {
+          const separator = prev ? '\n\n' : '';
+          const header = `--- ${file.name} ---\n`;
+          return prev + separator + header + content;
+        });
+        
+      } catch (error) {
+        console.error(`Failed to read file ${file.name}:`, error);
+        setUploadedTextFiles(prev => prev.map(f => 
+          f.id === entry.id ? { ...f, status: 'error' } : f
+        ));
+      }
+    }
+
+    setIsLoadingTextFiles(false);
+    
+    const successCount = validFiles.length;
+    toast({
+      title: t("success"),
+      description: `تم تحميل ${successCount} ملف نصي بنجاح`,
+    });
+  };
+
+  const readFileAsText = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result;
+        if (typeof result === 'string') {
+          resolve(result);
+        } else {
+          reject(new Error('Failed to read file as text'));
+        }
+      };
+      reader.onerror = () => reject(new Error('File reading failed'));
+      reader.readAsText(file, 'UTF-8');
+    });
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -244,11 +336,16 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
     setAudioBlob(null);
     setUploadedFiles([]);
     setText("");
+    setUploadedTextFiles([]);
     setIsPlaying(false);
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
+  };
+
+  const removeTextFile = (fileId: string) => {
+    setUploadedTextFiles(prev => prev.filter(f => f.id !== fileId));
   };
 
   const formatTime = (seconds: number) => {
@@ -558,9 +655,14 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
                 variant="outline"
                 size="sm"
                 className="text-xs"
+                disabled={isLoadingTextFiles}
               >
-                <Upload className="w-3 h-3 ml-1" />
-                رفع ملف نصي
+                {isLoadingTextFiles ? (
+                  <Loader2 className="w-3 h-3 ml-1 animate-spin" />
+                ) : (
+                  <Upload className="w-3 h-3 ml-1" />
+                )}
+                رفع ملفات نصية
               </Button>
             </div>
             <Textarea
@@ -575,10 +677,57 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
             </div>
           </div>
 
+          {/* Uploaded Text Files List */}
+          {uploadedTextFiles.length > 0 && (
+            <div className="space-y-3 p-4 border border-border rounded-lg bg-card">
+              <h3 className="text-sm font-medium text-foreground">
+                الملفات النصية المرفوعة ({uploadedTextFiles.length})
+              </h3>
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {uploadedTextFiles.map((file) => (
+                  <div
+                    key={file.id}
+                    className="flex items-center justify-between p-2 border border-border/50 rounded bg-background"
+                  >
+                    <div className="flex items-center space-x-2 space-x-reverse flex-1 min-w-0">
+                      <MessageSquare className="w-4 h-4 text-primary flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium text-foreground truncate">
+                          {file.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {(file.size / 1024).toFixed(1)} KB
+                        </p>
+                      </div>
+                      {file.status === 'loading' && (
+                        <Loader2 className="w-3 h-3 animate-spin text-primary" />
+                      )}
+                      {file.status === 'loaded' && (
+                        <Badge variant="secondary" className="text-xs">محمل</Badge>
+                      )}
+                      {file.status === 'error' && (
+                        <Badge variant="destructive" className="text-xs">خطأ</Badge>
+                      )}
+                    </div>
+                    <Button
+                      onClick={() => removeTextFile(file.id)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <input
             ref={textFileInputRef}
             type="file"
-            accept=".txt,.md,.rtf,text/*"
+            multiple
+            accept=".txt,.md,.rtf,.csv,.json,.xml,.yml,.yaml,.log,.ini,.cfg,.conf,.sql,.py,.js,.html,.css,.scss,.ts,.tsx,.jsx,.vue,.php,.rb,.go,.rs,.java,.cpp,.c,.h,.sh,.bat,.ps1,text/*,application/json,application/xml"
             onChange={handleTextFileUpload}
             className="hidden"
           />
