@@ -78,6 +78,13 @@ const Review = () => {
       
       for (const file of completedFiles) {
         try {
+          // Check if file already has classification data
+          if (file.classification?.aiClassification) {
+            console.log(`File ${file.name} already classified as: ${file.classification.aiClassification}`);
+            successfulClassifications++;
+            continue;
+          }
+
           console.log(`Classifying file: ${file.name}`);
           
           const { data, error } = await supabase.functions.invoke('classify-conversation', {
