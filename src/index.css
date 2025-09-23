@@ -61,6 +61,10 @@
     
     /* Spacing & Layout */
     --radius: 0.75rem;
+    
+    /* Popover Colors - Light Mode */
+    --popover: 0 0% 100%;
+    --popover-foreground: 223 39% 12%;
 
     --sidebar-background: 0 0% 98%;
 
