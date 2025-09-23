@@ -4,12 +4,11 @@ import UnifiedProcessor from "@/components/UnifiedProcessor";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mic, Settings, Zap, MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
 const Voice = () => {
-  const { t } = useTranslation();
-  
-  return (
-    <div className="min-h-screen bg-background">
+  const {
+    t
+  } = useTranslation();
+  return <div className="min-h-screen bg-background">
       <Navigation />
       
       <main className="max-w-6xl mx-auto px-6 py-8">
@@ -81,7 +80,7 @@ const Voice = () => {
         <div className="space-y-8">
           {/* Category Management Section - Priority */}
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-foreground mb-6 text-center">{t("classificationCategories")}</h2>
+            
             <CategoryManager />
           </div>
 
@@ -92,8 +91,6 @@ const Voice = () => {
           </div>
         </div>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default Voice;
