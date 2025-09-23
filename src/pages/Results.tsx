@@ -16,24 +16,25 @@ import { deserializeBatchData } from "@/utils/fileSerializer";
 import { useTranslation } from "react-i18next";
 import { getUserCategories } from "@/utils/categoryStorage";
 import { updateSatisfactionResponse, updateVerifiedClassification, updateFinalClassification, saveTranscriptionResult } from "@/services/transcriptionStorageService";
-
 const Results = () => {
-  const { t } = useTranslation();
+  const {
+    t
+  } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [files, setFiles] = useState<BatchFile[]>([]);
   const [activeTab, setActiveTab] = useState<string>("");
   const [satisfactionAnswers, setSatisfactionAnswers] = useState<Record<string, 'satisfied' | 'not-satisfied' | null>>({});
   const [categories, setCategories] = useState<string[]>([]);
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const batchId = searchParams.get('batch');
-
   useEffect(() => {
     const loadedCategories = getUserCategories();
     console.log('Loading categories in Results page:', loadedCategories);
     setCategories(loadedCategories);
   }, []);
-
   useEffect(() => {
     // Load batch data
     const loadBatchData = async () => {
@@ -56,42 +57,31 @@ const Results = () => {
         }
       }
     };
-    
     loadBatchData();
   }, [batchId, navigate]);
-
   const updateFileVerification = async (fileId: string, verifiedCategory: string) => {
-    setFiles(prev => prev.map(file => 
-      file.id === fileId 
-        ? {
-            ...file,
-            classification: {
-              ...file.classification!,
-              verified: verifiedCategory
-            }
-          }
-        : file
-    ));
-    
+    setFiles(prev => prev.map(file => file.id === fileId ? {
+      ...file,
+      classification: {
+        ...file.classification!,
+        verified: verifiedCategory
+      }
+    } : file));
+
     // Update localStorage
     if (batchId) {
       const batchData = {
         id: batchId,
-        files: files.map(file => 
-          file.id === fileId 
-            ? {
-                ...file,
-                classification: {
-                  ...file.classification!,
-                  verified: verifiedCategory
-                }
-              }
-            : file
-        ),
+        files: files.map(file => file.id === fileId ? {
+          ...file,
+          classification: {
+            ...file.classification!,
+            verified: verifiedCategory
+          }
+        } : file),
         createdAt: new Date(),
         status: 'completed' as const
       };
-      
       localStorage.setItem(`batchData_${batchId}`, JSON.stringify(batchData));
     }
 
@@ -110,16 +100,14 @@ const Results = () => {
           batch_id: batchId || '',
           file_id: fileId
         });
-        
         if (saveResult.success) {
           // Then update with satisfaction and verification data
           const finalResult = await updateFinalClassification(fileId, verifiedCategory, 'not-satisfied');
-          
           if (finalResult.success) {
             console.log('Complete transcription data saved for unsatisfied user:', fileId);
             toast({
               title: t("success"),
-              description: `${t("categoryVerifiedAs")} "${verifiedCategory}"`,
+              description: `${t("categoryVerifiedAs")} "${verifiedCategory}"`
             });
           } else {
             console.error('Error updating final classification:', finalResult.error);
@@ -147,25 +135,20 @@ const Results = () => {
       }
     }
   };
-
   const handleNewTranscription = () => {
     navigate("/");
   };
-
   const handleExport = () => {
     // TODO: Implement export functionality
     console.log("Export results");
   };
-
   const handleShare = () => {
     // TODO: Implement share functionality
     console.log("Share results");
   };
-
   const handleSatisfactionResponse = async (fileId: string, response: 'satisfied' | 'not-satisfied') => {
     const file = files.find(f => f.id === fileId);
     if (!file || !file.classification) return;
-
     setSatisfactionAnswers(prev => ({
       ...prev,
       [fileId]: response
@@ -173,33 +156,26 @@ const Results = () => {
 
     // Determine final classification based on satisfaction response
     let finalClassification: string;
-    
     if (response === 'satisfied') {
       // User is satisfied with AI classification - only show UI feedback, don't save to database
       toast({
         title: t("success"),
-        description: "شكرًا لك! تم تأكيد التصنيف",
+        description: "شكرًا لك! تم تأكيد التصنيف"
       });
     }
     // If not satisfied, don't save yet - wait for user to select category
   };
-  
+
   // If no batch data, show single file results (legacy)
   if (!batchId || files.length === 0) {
-    return (
-      <div className="min-h-screen bg-background">
+    return <div className="min-h-screen bg-background">
         <Navigation />
         
         <main className="max-w-6xl mx-auto px-6 py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/")}
-                className="flex items-center space-x-2 space-x-reverse"
-              >
+              <Button variant="outline" size="sm" onClick={() => navigate("/")} className="flex items-center space-x-2 space-x-reverse">
                 <ArrowLeft className="w-4 h-4" />
                 <span>{t("backToVoiceInput")}</span>
               </Button>
@@ -214,28 +190,15 @@ const Results = () => {
             </div>
             
             <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShare}
-                className="flex items-center space-x-2 space-x-reverse"
-              >
+              <Button variant="outline" size="sm" onClick={handleShare} className="flex items-center space-x-2 space-x-reverse">
                 <Share2 className="w-4 h-4" />
                 <span>{t("share")}</span>
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExport}
-                className="flex items-center space-x-2 space-x-reverse"
-              >
+              <Button variant="outline" size="sm" onClick={handleExport} className="flex items-center space-x-2 space-x-reverse">
                 <Download className="w-4 h-4" />
                 <span>{t("export")}</span>
               </Button>
-              <Button
-                onClick={handleNewTranscription}
-                className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse"
-              >
+              <Button onClick={handleNewTranscription} className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse">
                 <RotateCcw className="w-4 h-4" />
                 <span>{t("newTranscription")}</span>
               </Button>
@@ -292,24 +255,16 @@ const Results = () => {
             </Card>
           </div>
         </main>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <Navigation />
       
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/")}
-              className="flex items-center space-x-2 space-x-reverse"
-            >
+            <Button variant="outline" size="sm" onClick={() => navigate("/")} className="flex items-center space-x-2 space-x-reverse">
               <ArrowLeft className="w-4 h-4" />
               <span>{t("backToVoiceInput")}</span>
             </Button>
@@ -325,19 +280,11 @@ const Results = () => {
           
           <div className="flex items-center space-x-2">
             <EmailResultsDialog files={files} />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExport}
-              className="flex items-center space-x-2 space-x-reverse"
-            >
+            <Button variant="outline" size="sm" onClick={handleExport} className="flex items-center space-x-2 space-x-reverse">
               <Download className="w-4 h-4" />
               <span>{t("export")}</span>
             </Button>
-            <Button
-              onClick={handleNewTranscription}
-              className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse"
-            >
+            <Button onClick={handleNewTranscription} className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse">
               <RotateCcw className="w-4 h-4" />
               <span>{t("newBatch")}</span>
             </Button>
@@ -347,25 +294,16 @@ const Results = () => {
         {/* Batch Results Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-auto overflow-x-auto">
-            {files.map((file, index) => (
-              <TabsTrigger 
-                key={file.id} 
-                value={file.id}
-                className="min-w-[150px] text-left"
-              >
+            {files.map((file, index) => <TabsTrigger key={file.id} value={file.id} className="min-w-[150px] text-left">
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <FileText className="w-4 h-4" />
                   <span className="truncate">{t("file")} {index + 1}</span>
-                  {file.classification?.verified && (
-                    <CheckCircle className="w-3 h-3 text-success" />
-                  )}
+                  {file.classification?.verified && <CheckCircle className="w-3 h-3 text-success" />}
                 </div>
-              </TabsTrigger>
-            ))}
+              </TabsTrigger>)}
           </TabsList>
           
-          {files.map((file) => (
-            <TabsContent key={file.id} value={file.id} className="mt-6">
+          {files.map(file => <TabsContent key={file.id} value={file.id} className="mt-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* File Info */}
                 <Card>
@@ -412,109 +350,74 @@ const Results = () => {
                     <div>
                       <p className="text-sm font-medium mb-2">{t('aiClassification')}</p>
                       <div className="flex items-center space-x-2">
-                        <Badge 
-                          variant="secondary" 
-                          className="bg-primary/10 text-primary border-primary/20"
-                        >
+                        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
                           {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
                         </Badge>
-                        {file.classification?.confidence && (
-                          <span className="text-xs text-muted-foreground">
-                            الثقة: {Math.round(file.classification.confidence * 100)}%
-                          </span>
-                        )}
+                        {file.classification?.confidence}
                       </div>
                     </div>
 
                     {/* Satisfaction Survey */}
-                    {!satisfactionAnswers[file.id] && (
-                      <Card className="border-2 border-dashed border-primary/30">
+                    {!satisfactionAnswers[file.id] && <Card className="border-2 border-dashed border-primary/30">
                         <CardContent className="pt-6">
                           <div className="text-center space-y-4">
                             <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
                             <div className="flex justify-center gap-4">
-                              <Button
-                                onClick={() => handleSatisfactionResponse(file.id, 'satisfied')}
-                                variant="outline"
-                                className="hover:bg-success/10 hover:border-success hover:text-success"
-                              >
+                              <Button onClick={() => handleSatisfactionResponse(file.id, 'satisfied')} variant="outline" className="hover:bg-success/10 hover:border-success hover:text-success">
                                 {t('yesSatisfied')}
                               </Button>
-                              <Button
-                                onClick={() => handleSatisfactionResponse(file.id, 'not-satisfied')}
-                                variant="outline"
-                                className="hover:bg-destructive/10 hover:border-destructive hover:text-destructive"
-                              >
+                              <Button onClick={() => handleSatisfactionResponse(file.id, 'not-satisfied')} variant="outline" className="hover:bg-destructive/10 hover:border-destructive hover:text-destructive">
                                 {t('notSatisfied')}
                               </Button>
                             </div>
                           </div>
                         </CardContent>
-                      </Card>
-                    )}
+                      </Card>}
 
                     {/* Show satisfaction result */}
-                    {satisfactionAnswers[file.id] === 'satisfied' && (
-                      <div className="mt-2 p-2 bg-success/10 rounded-md">
+                    {satisfactionAnswers[file.id] === 'satisfied' && <div className="mt-2 p-2 bg-success/10 rounded-md">
                         <div className="flex items-center space-x-2">
                           <CheckCircle className="w-3 h-3 text-success" />
                           <span className="text-xs text-success">
                             تم الموافقة على تصنيف الذكاء الاصطناعي
                           </span>
                         </div>
-                      </div>
-                    )}
+                      </div>}
 
                     {/* Confirmation Classification - Only show when user is not satisfied */}
-                    {satisfactionAnswers[file.id] === 'not-satisfied' && (
-                      <div className="space-y-3">
+                    {satisfactionAnswers[file.id] === 'not-satisfied' && <div className="space-y-3">
                         <div>
                           <p className="text-sm font-medium mb-2">{t('confirmationClassification')}</p>
-                          {categories.length === 0 ? (
-                            <div className="text-center py-4 text-muted-foreground">
+                          {categories.length === 0 ? <div className="text-center py-4 text-muted-foreground">
                               <p className="mb-2">لا توجد فئات متاحة</p>
                               <p className="text-sm">يرجى إضافة فئات في إعدادات التصنيف أولاً</p>
-                            </div>
-                          ) : (
-                            <Select
-                              value={file.classification?.verified || ""}
-                              onValueChange={(value) => updateFileVerification(file.id, value)}
-                            >
+                            </div> : <Select value={file.classification?.verified || ""} onValueChange={value => updateFileVerification(file.id, value)}>
                               <SelectTrigger>
                                 <SelectValue placeholder="اختر التصنيف الصحيح" />
                               </SelectTrigger>
                               <SelectContent>
-                                {categories.map(category => (
-                                  <SelectItem key={category} value={category}>
+                                {categories.map(category => <SelectItem key={category} value={category}>
                                     {category}
-                                  </SelectItem>
-                                ))}
+                                  </SelectItem>)}
                               </SelectContent>
-                            </Select>
-                          )}
+                            </Select>}
                         </div>
                         
-                        {file.classification?.verified && (
-                          <div className="mt-2 p-2 bg-success/10 rounded-md">
+                        {file.classification?.verified && <div className="mt-2 p-2 bg-success/10 rounded-md">
                             <div className="flex items-center space-x-2">
                               <CheckCircle className="w-3 h-3 text-success" />
                               <span className="text-xs text-success">
                                 تم تأكيد التصنيف المصحح: {file.classification.verified}
                               </span>
                             </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                          </div>}
+                      </div>}
                   </CardContent>
                 </Card>
               </div>
-            </TabsContent>
-          ))}
+            </TabsContent>)}
         </Tabs>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default Results;
