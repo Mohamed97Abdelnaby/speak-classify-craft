@@ -217,7 +217,7 @@ const VoiceRecorder = () => {
       await setBatchData(batchId, serializedBatchData);
       
       // Navigate to email option page
-      navigate(`/email-option?batch=${batchId}`);
+      navigate(`/processing?batch=${batchId}`);
     } catch (error) {
       console.error('Failed to prepare batch data:', error);
       toast({
