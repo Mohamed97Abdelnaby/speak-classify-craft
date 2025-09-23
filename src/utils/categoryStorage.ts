@@ -1,13 +1,14 @@
 const STORAGE_KEY = 'userCategories';
 
 const DEFAULT_CATEGORIES = [
-  'شكوى من الخدمة',
-  'طلب معلومات',
-  'استفسار تقني',
-  'مشكلة في الفاتورة',
-  'طلب إلغاء',
-  'مدح وثناء',
-  'اقتراح تحسين'
+  'عميل متجاوب',
+  'عميل واعد',
+  'عميل مماطل',
+  'عميل يستخدم التلاعب العاطفي والهجوم',
+  'عميل من رافض لمتجاوب',
+  'عميل غاضب ويتلفظ مسيء',
+  'عميل رافض',
+  'عميل لا يستطيع'
 ];
 
 export const getUserCategories = (): string[] => {
@@ -15,12 +16,12 @@ export const getUserCategories = (): string[] => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const categories = JSON.parse(stored);
-      return Array.isArray(categories) ? categories : [];
+      return Array.isArray(categories) ? categories : getDefaultCategories();
     }
   } catch (error) {
     console.error('Error loading user categories:', error);
   }
-  return [];
+  return getDefaultCategories();
 };
 
 export const saveUserCategories = (categories: string[]): void => {
