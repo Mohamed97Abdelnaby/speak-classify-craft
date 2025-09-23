@@ -337,7 +337,8 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
       if (hasAudio) {
         navigate(`/email-option?batch=${batchId}`);
       } else {
-        navigate(`/results?batch=${batchId}`);
+        // For text-only input, go to review page like audio does
+        navigate(`/review?batch=${batchId}`);
       }
 
     } catch (error) {
