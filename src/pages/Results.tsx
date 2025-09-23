@@ -349,12 +349,11 @@ const Results = () => {
                     {/* Always show AI Classification */}
                     <div>
                       <p className="text-sm font-medium mb-2">{t('aiClassification')}</p>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
-                          {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
-                        </Badge>
-                        {file.classification?.confidence}
-                      </div>
+                       <div className="flex items-center space-x-2">
+                         <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                           {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
+                         </Badge>
+                       </div>
                     </div>
 
                     {/* Satisfaction Survey */}
