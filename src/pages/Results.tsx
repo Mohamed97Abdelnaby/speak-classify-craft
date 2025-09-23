@@ -476,10 +476,10 @@ const Results = () => {
                         </div>
                         
                         {file.classification?.verified && (
-                          <div className="mt-2 p-2 bg-primary/10 rounded-md">
+                          <div className="mt-2 p-2 bg-success/10 rounded-md">
                             <div className="flex items-center space-x-2">
-                              <CheckCircle className="w-3 h-3 text-primary" />
-                              <span className="text-xs text-primary">
+                              <CheckCircle className="w-3 h-3 text-success" />
+                              <span className="text-xs text-success">
                                 تم تأكيد التصنيف المصحح: {file.classification.verified}
                               </span>
                             </div>
