@@ -54,6 +54,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const textFileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Get all available categories (user categories + default ones)
   const defaultCategories = [
@@ -130,19 +131,50 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
     addFiles(files);
   };
 
+  const handleTextFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    addFiles(files);
+    // Clear the input value to allow re-uploading the same file
+    if (textFileInputRef.current) {
+      textFileInputRef.current.value = '';
+    }
+  };
+
   const addFiles = (files: File[]) => {
-    const validFiles = files.filter(file => file.type.startsWith('audio/'));
+    const audioFiles = files.filter(file => file.type.startsWith('audio/'));
+    const textFiles = files.filter(file => 
+      file.type.startsWith('text/') || 
+      file.name.toLowerCase().endsWith('.txt') ||
+      file.name.toLowerCase().endsWith('.md') ||
+      file.name.toLowerCase().endsWith('.rtf')
+    );
+    const validFiles = [...audioFiles, ...textFiles];
     const invalidFiles = files.length - validFiles.length;
     
     if (invalidFiles > 0) {
       toast({
         title: t("error"),
-        description: `${invalidFiles} ملف غير صوتي تم تجاهله.`,
+        description: `${invalidFiles} ملف غير مدعوم تم تجاهله.`,
         variant: "destructive",
       });
     }
     
-    const newBatchFiles: BatchFile[] = validFiles.map(file => ({
+    // Handle text files - read their content
+    textFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        setText(prev => prev + (prev ? '\n\n' : '') + content);
+        toast({
+          title: t("success"),
+          description: `تم تحميل محتوى الملف: ${file.name}`,
+        });
+      };
+      reader.readAsText(file);
+    });
+    
+    // Handle audio files as before
+    const newBatchFiles: BatchFile[] = audioFiles.map(file => ({
       id: `${Date.now()}-${Math.random()}`,
       name: file.name,
       file,
@@ -153,10 +185,10 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
     setUploadedFiles(prev => [...prev, ...newBatchFiles]);
     setAudioBlob(null);
     
-    if (validFiles.length > 0) {
+    if (audioFiles.length > 0) {
       toast({
         title: t("success"),
-        description: `تم إضافة ${validFiles.length} ملف صوتي بنجاح`,
+        description: `تم إضافة ${audioFiles.length} ملف صوتي بنجاح`,
       });
     }
   };
@@ -517,9 +549,20 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
         
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">
-              {t("conversationText")}
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-foreground">
+                {t("conversationText")}
+              </label>
+              <Button
+                onClick={() => textFileInputRef.current?.click()}
+                variant="outline"
+                size="sm"
+                className="text-xs"
+              >
+                <Upload className="w-3 h-3 ml-1" />
+                رفع ملف نصي
+              </Button>
+            </div>
             <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -531,6 +574,14 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
               <span>{text.length} {t("characters")}</span>
             </div>
           </div>
+
+          <input
+            ref={textFileInputRef}
+            type="file"
+            accept=".txt,.md,.rtf,text/*"
+            onChange={handleTextFileUpload}
+            className="hidden"
+          />
         </CardContent>
       </Card>
 
