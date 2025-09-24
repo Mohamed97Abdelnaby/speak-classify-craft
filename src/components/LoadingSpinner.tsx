@@ -13,24 +13,33 @@ const LoadingSpinner = ({ message }: LoadingSpinnerProps) => {
     <Card className="w-full max-w-md mx-auto">
       <CardContent className="flex flex-col items-center justify-center py-12">
         <div className="relative mb-6">
-          <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center">
-            <Mic className="w-8 h-8 text-primary-foreground" />
+          {/* Animated gradient background with pulse effect */}
+          <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center animate-pulse relative">
+            {/* Inner rotating ring */}
+            <div className="absolute inset-1 border-2 border-primary-foreground/30 rounded-full animate-spin border-t-primary-foreground"></div>
+            {/* Mic icon with subtle animation */}
+            <Mic className="w-10 h-10 text-primary-foreground animate-pulse" />
           </div>
-          <Loader2 className="absolute -top-2 -left-2 w-6 h-6 text-primary animate-spin" />
         </div>
         
-        <h3 className="text-lg font-semibold text-foreground mb-2">
+        <h3 className="text-xl font-bold text-foreground mb-3 text-center">
           {t("processingAudio")}
         </h3>
         
-        <p className="text-muted-foreground text-center max-w-sm">
-          {message}
+        <p className="text-muted-foreground text-center max-w-sm mb-2 leading-relaxed">
+          {message || t("processingContent")}
         </p>
         
-        <div className="mt-6 flex space-x-1 space-x-reverse">
+        {/* Enhanced bouncing dots with Arabic styling */}
+        <div className="mt-4 flex space-x-1 items-center">
           <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
           <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
           <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+        </div>
+        
+        {/* Processing status text */}
+        <div className="mt-4 text-sm text-muted-foreground/80 text-center">
+          {t("analyzingPatterns")}
         </div>
       </CardContent>
     </Card>
