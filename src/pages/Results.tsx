@@ -368,39 +368,39 @@ const Results = () => {
           
           {/* Files displayed side by side */}
           <div className="mt-6 overflow-x-auto">
-            <div className="flex gap-6 min-w-max pb-4">
+            <div className="flex gap-8 min-w-max pb-6">
               {files.map(file => (
-                <div key={file.id} className="flex-shrink-0 w-80">
-                  <div className="space-y-4">
+                <div key={file.id} className="flex-shrink-0 w-96 lg:w-[28rem]">
+                  <div className="space-y-6">
                     {/* File Info */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">معلومات الملف</CardTitle>
+                    <Card className="shadow-md">
+                      <CardHeader className="pb-6">
+                        <CardTitle className="text-xl">معلومات الملف</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
+                      <CardContent className="space-y-4">
                         <div>
-                          <p className="text-sm font-medium">اسم الملف</p>
-                          <p className="text-sm text-muted-foreground">{file.name}</p>
+                          <p className="text-base font-medium">اسم الملف</p>
+                          <p className="text-base text-muted-foreground">{file.name}</p>
                         </div>
                         <div>
-                          <p className="text-sm font-medium">الحالة</p>
-                          <Badge variant="default">مكتمل</Badge>
+                          <p className="text-base font-medium">الحالة</p>
+                          <Badge variant="default" className="text-sm">مكتمل</Badge>
                         </div>
                         <div>
-                          <p className="text-sm font-medium">التصنيف الأصلي</p>
-                          <Badge variant="outline">{file.category || 'غير محدد'}</Badge>
+                          <p className="text-base font-medium">التصنيف الأصلي</p>
+                          <Badge variant="outline" className="text-sm">{file.category || 'غير محدد'}</Badge>
                         </div>
                       </CardContent>
                     </Card>
 
                     {/* Transcription */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">ملخص المحادثة</CardTitle>
+                    <Card className="shadow-md">
+                      <CardHeader className="pb-6">
+                        <CardTitle className="text-xl">ملخص المحادثة</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="p-4 bg-muted/50 rounded-md max-h-40 overflow-y-auto">
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap" dir="rtl">
+                        <div className="p-6 bg-muted/50 rounded-md max-h-80 overflow-y-auto">
+                          <p className="text-base leading-relaxed whitespace-pre-wrap" dir="rtl">
                             {file.summary || file.transcription || 'لا يوجد نص مستخرج'}
                           </p>
                         </div>
@@ -408,16 +408,16 @@ const Results = () => {
                     </Card>
 
                     {/* Classification & Verification */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">التصنيف</CardTitle>
+                    <Card className="shadow-md">
+                      <CardHeader className="pb-6">
+                        <CardTitle className="text-xl">التصنيف</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-6">
                         {/* Always show AI Classification */}
                         <div>
-                          <p className="text-sm font-medium mb-2">{t('aiClassification')}</p>
+                          <p className="text-base font-medium mb-3">{t('aiClassification')}</p>
                           <div className="flex items-center space-x-2">
-                            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-sm px-3 py-1">
                               {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
                             </Badge>
                           </div>
