@@ -49,6 +49,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
   // Text input states
   const [text, setText] = useState("");
   const [uploadedTextFiles, setUploadedTextFiles] = useState<{id: string, name: string, size: number, status: 'loading' | 'loaded' | 'error'}[]>([]);
+  const [processedTextFiles, setProcessedTextFiles] = useState<{id: string, name: string, content: string}[]>([]);
   const [isLoadingTextFiles, setIsLoadingTextFiles] = useState(false);
   
   // Processing states
@@ -246,7 +247,14 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
           f.id === entry.id ? { ...f, status: 'loaded' } : f
         ));
         
-        // Add content to text area with file header
+        // Store individual file content for processing
+        setProcessedTextFiles(prev => [...prev, {
+          id: entry.id,
+          name: file.name,
+          content
+        }]);
+        
+        // Add content to text area with file header for preview
         setText(prev => {
           const separator = prev ? '\n\n' : '';
           const header = `--- ${file.name} ---\n`;
@@ -340,6 +348,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
     setUploadedFiles([]);
     setText("");
     setUploadedTextFiles([]);
+    setProcessedTextFiles([]);
     setIsPlaying(false);
     if (audioRef.current) {
       audioRef.current.pause();
@@ -349,6 +358,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
 
   const removeTextFile = (fileId: string) => {
     setUploadedTextFiles(prev => prev.filter(f => f.id !== fileId));
+    setProcessedTextFiles(prev => prev.filter(f => f.id !== fileId));
   };
 
   const formatTime = (seconds: number) => {
@@ -360,7 +370,9 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
   // Unified processing function
   const handleProcess = async () => {
     const hasAudio = uploadedFiles.length > 0 || audioBlob;
-    const hasText = text.trim().length > 0;
+    const hasManualText = text.trim().length > 0 && processedTextFiles.length === 0;
+    const hasUploadedTextFiles = processedTextFiles.length > 0;
+    const hasText = hasManualText || hasUploadedTextFiles;
     
     if (!hasAudio && !hasText) {
       toast({
@@ -377,55 +389,130 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
       const batchId = `batch-unified-${Date.now()}`;
       const batchFiles: BatchFile[] = [];
 
-      // Process text input if available
-      if (hasText) {
-        console.log('Processing text input...');
+      // Process manually typed text if available (and no uploaded text files)
+      if (hasManualText) {
+        console.log('Processing manual text input...');
         
-        // Summarize text
-        const summaryResponse = await supabase.functions.invoke('summarize-conversation', {
-          body: { transcription: text }
-        });
+        try {
+          // Summarize text
+          const summaryResponse = await supabase.functions.invoke('summarize-conversation', {
+            body: { transcription: text }
+          });
 
-        let summary = '';
-        if (summaryResponse.error) {
-          console.error('Summarization error:', summaryResponse.error);
-          summary = text;
-        } else {
-          summary = summaryResponse.data.summary;
-        }
-        
-        // Classify text
-        const classifyResponse = await supabase.functions.invoke('classify-conversation', {
-          body: { transcription: text }
-        });
-
-        if (classifyResponse.error) {
-          throw new Error(classifyResponse.error.message);
-        }
-
-        if (!classifyResponse.data.success) {
-          throw new Error(classifyResponse.data.error || 'Classification failed');
-        }
-
-        // Create text batch file
-        const textFile: BatchFile = {
-          id: `text-${Date.now()}`,
-          name: `${t('textConversationFilename')}-${new Date().toISOString().split('T')[0]}.txt`,
-          file: new File([text], `${t('conversationFile')}-${Date.now()}.txt`, { type: 'text/plain' }),
-          status: 'completed',
-          transcription: text,
-          summary: summary,
-          classification: {
-            predicted: classifyResponse.data.classification,
-            confidence: 1,
-            aiClassification: classifyResponse.data.classification,
-            classificationTimestamp: classifyResponse.data.timestamp
+          let summary = '';
+          if (summaryResponse.error) {
+            console.error('Summarization error:', summaryResponse.error);
+            summary = text;
+          } else {
+            summary = summaryResponse.data.summary;
           }
-        };
+          
+          // Classify text
+          const classifyResponse = await supabase.functions.invoke('classify-conversation', {
+            body: { transcription: text }
+          });
 
-        batchFiles.push(textFile);
+          if (classifyResponse.error) {
+            throw new Error(classifyResponse.error.message);
+          }
 
-        // Data will only be saved to database if user is unsatisfied with results
+          if (!classifyResponse.data.success) {
+            throw new Error(classifyResponse.data.error || 'Classification failed');
+          }
+
+          // Create text batch file
+          const textFile: BatchFile = {
+            id: `text-${Date.now()}`,
+            name: `${t('textConversationFilename')}-${new Date().toISOString().split('T')[0]}.txt`,
+            file: new File([text], `${t('conversationFile')}-${Date.now()}.txt`, { type: 'text/plain' }),
+            status: 'completed',
+            transcription: text,
+            summary: summary,
+            classification: {
+              predicted: classifyResponse.data.classification,
+              confidence: 1,
+              aiClassification: classifyResponse.data.classification,
+              classificationTimestamp: classifyResponse.data.timestamp
+            }
+          };
+
+          batchFiles.push(textFile);
+        } catch (error) {
+          console.error('Manual text processing error:', error);
+          const errorFile: BatchFile = {
+            id: `text-error-${Date.now()}`,
+            name: `${t('textConversationFilename')}-${new Date().toISOString().split('T')[0]}.txt`,
+            file: new File([text], `${t('conversationFile')}-${Date.now()}.txt`, { type: 'text/plain' }),
+            status: 'completed',
+            transcription: text,
+            summary: error instanceof Error ? `خطأ في المعالجة: ${error.message}` : 'خطأ في المعالجة'
+          };
+          batchFiles.push(errorFile);
+        }
+      }
+
+      // Process uploaded text files individually
+      if (hasUploadedTextFiles) {
+        console.log('Processing uploaded text files...');
+        
+        for (const textFile of processedTextFiles) {
+          try {
+            // Summarize text
+            const summaryResponse = await supabase.functions.invoke('summarize-conversation', {
+              body: { transcription: textFile.content }
+            });
+
+            let summary = '';
+            if (summaryResponse.error) {
+              console.error('Summarization error:', summaryResponse.error);
+              summary = textFile.content;
+            } else {
+              summary = summaryResponse.data.summary;
+            }
+            
+            // Classify text
+            const classifyResponse = await supabase.functions.invoke('classify-conversation', {
+              body: { transcription: textFile.content }
+            });
+
+            if (classifyResponse.error) {
+              throw new Error(classifyResponse.error.message);
+            }
+
+            if (!classifyResponse.data.success) {
+              throw new Error(classifyResponse.data.error || 'Classification failed');
+            }
+
+            // Create batch file for this text file
+            const batchFile: BatchFile = {
+              id: textFile.id,
+              name: textFile.name,
+              file: new File([textFile.content], textFile.name, { type: 'text/plain' }),
+              status: 'completed',
+              transcription: textFile.content,
+              summary: summary,
+              classification: {
+                predicted: classifyResponse.data.classification,
+                confidence: 1,
+                aiClassification: classifyResponse.data.classification,
+                classificationTimestamp: classifyResponse.data.timestamp
+              }
+            };
+
+            batchFiles.push(batchFile);
+          } catch (error) {
+            console.error(`Text file processing error for ${textFile.name}:`, error);
+            const errorFile: BatchFile = {
+              id: textFile.id,
+              name: textFile.name,
+              file: new File([textFile.content], textFile.name, { type: 'text/plain' }),
+              status: 'completed',
+              transcription: textFile.content,
+              summary: error instanceof Error ? `خطأ في المعالجة: ${error.message}` : 'خطأ في المعالجة'
+            };
+            batchFiles.push(errorFile);
+          }
+        }
       }
 
       // Process audio files if available
@@ -477,7 +564,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
       ? URL.createObjectURL(uploadedFiles[0].file) 
       : null;
 
-  const hasAnyInput = uploadedFiles.length > 0 || audioBlob || text.trim().length > 0;
+  const hasAnyInput = uploadedFiles.length > 0 || audioBlob || text.trim().length > 0 || processedTextFiles.length > 0;
 
   return (
     <div className="space-y-6">
