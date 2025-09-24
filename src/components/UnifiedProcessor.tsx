@@ -492,29 +492,6 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
               }
             };
 
-            // Save transcription result to database
-            try {
-              const saveResult = await saveTranscriptionResult({
-                file_name: textFile.name,
-                file_size: textFile.content.length,
-                file_id: textFile.id,
-                transcription_text: textFile.content,
-                summary: summary,
-                ai_classification: classifyResponse.data.classification,
-                ai_confidence: 1,
-                batch_id: batchId
-              });
-              
-              if (saveResult.success) {
-                console.log(`Text file result saved to database for ${textFile.name}`);
-              } else {
-                console.error(`Failed to save text file to database for ${textFile.name}:`, saveResult.error);
-              }
-            } catch (dbError) {
-              console.error(`Database save error for text file ${textFile.name}:`, dbError);
-              // Continue processing even if database save fails
-            }
-
             batchFiles.push(batchFile);
           } catch (error) {
             console.error(`Text file processing error for ${textFile.name}:`, error);

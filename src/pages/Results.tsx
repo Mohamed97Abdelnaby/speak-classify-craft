@@ -115,20 +115,36 @@ const Results = () => {
       localStorage.setItem(`batchData_${batchId}`, JSON.stringify(batchData));
     }
 
-    // Update final classification in database for unsatisfied users
+    // Save to database only for unsatisfied users (for LLM fine-tuning)
     const fileToSave = files.find(f => f.id === fileId);
     if (fileToSave) {
       try {
-        // Directly update with satisfaction and verification data
-        const finalResult = await updateFinalClassification(fileId, verifiedCategory, 'not-satisfied');
-        if (finalResult.success) {
-          console.log('Final classification updated for file:', fileId);
-          toast({
-            title: t("success"),
-            description: `${t("categoryVerifiedAs")} "${verifiedCategory}"`
-          });
+        // Create new record with all transcription data since no record exists yet
+        const saveResult = await saveTranscriptionResult({
+          file_name: fileToSave.name,
+          file_size: fileToSave.file?.size || 0,
+          file_id: fileId,
+          transcription_text: fileToSave.transcription || '',
+          summary: fileToSave.summary || '',
+          ai_classification: fileToSave.classification?.aiClassification || fileToSave.classification?.predicted || '',
+          ai_confidence: fileToSave.classification?.confidence || 0,
+          batch_id: batchId!
+        });
+        
+        if (saveResult.success) {
+          // Now update with satisfaction and verification data
+          const finalResult = await updateFinalClassification(fileId, verifiedCategory, 'not-satisfied');
+          if (finalResult.success) {
+            console.log('Wrong result saved to database for fine-tuning:', fileId);
+            toast({
+              title: t("success"),
+              description: `${t("categoryVerifiedAs")} "${verifiedCategory}"`
+            });
+          } else {
+            console.error('Error updating satisfaction/verification:', finalResult.error);
+          }
         } else {
-          console.error('Error updating final classification:', finalResult.error);
+          console.error('Error saving transcription result:', saveResult.error);
           toast({
             title: "خطأ",
             description: "فشل في حفظ التصنيف النهائي",
@@ -136,7 +152,7 @@ const Results = () => {
           });
         }
       } catch (error) {
-        console.error('Error updating final classification:', error);
+        console.error('Error saving wrong result:', error);
         toast({
           title: "خطأ",
           description: "فشل في حفظ التصنيف النهائي",
