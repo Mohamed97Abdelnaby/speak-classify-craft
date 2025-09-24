@@ -26,6 +26,7 @@ import { serializeBatchData } from "@/utils/fileSerializer";
 import { setBatchData } from "@/utils/indexedDbStorage";
 import { saveTranscriptionResult } from "@/services/transcriptionStorageService";
 import { getUserCategories } from "@/utils/categoryStorage";
+import mammoth from "mammoth";
 
 interface UnifiedProcessorProps {
   categories?: string[];
@@ -334,23 +335,26 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
     
     setUploadedTextFiles(prev => [...prev, ...fileEntries]);
 
-    // Process files - for now, show as loaded but inform user about manual processing
+    // Process files and extract content
     for (let i = 0; i < validFiles.length; i++) {
       const file = validFiles[i];
       const entry = fileEntries[i];
       
       try {
-        // Update file status to loaded
+        // Read file as ArrayBuffer and parse with mammoth
+        const arrayBuffer = await file.arrayBuffer();
+        const content = await parseDocxContent(arrayBuffer);
+        
+        // Update file status
         setUploadedTextFiles(prev => prev.map(f => 
           f.id === entry.id ? { ...f, status: 'loaded' } : f
         ));
         
-        // Add placeholder content to text area with file header
+        // Add content to text area with file header
         setText(prev => {
           const separator = prev ? '\n\n' : '';
           const header = `--- ${file.name} (DOCX) ---\n`;
-          const placeholder = `[تم رفع ملف DOCX: ${file.name}]\n[يرجى نسخ ولصق المحتوى من الملف هنا يدوياً]\n`;
-          return prev + separator + header + placeholder;
+          return prev + separator + header + content;
         });
         
       } catch (error) {
@@ -358,6 +362,14 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
         setUploadedTextFiles(prev => prev.map(f => 
           f.id === entry.id ? { ...f, status: 'error' } : f
         ));
+        
+        // Add error message to text area
+        setText(prev => {
+          const separator = prev ? '\n\n' : '';
+          const header = `--- ${file.name} (DOCX - خطأ) ---\n`;
+          const errorMsg = `[خطأ في معالجة الملف: ${file.name}]\n`;
+          return prev + separator + header + errorMsg;
+        });
       }
     }
 
@@ -366,8 +378,19 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
     const successCount = validFiles.length;
     toast({
       title: t("success"),
-      description: `تم رفع ${successCount} ملف DOCX بنجاح. يرجى نسخ المحتوى يدوياً إلى منطقة النص`,
+      description: `تم استخراج النص من ${successCount} ملف DOCX بنجاح`,
     });
+  };
+
+  // Helper function to parse DOCX content using mammoth
+  const parseDocxContent = async (arrayBuffer: ArrayBuffer): Promise<string> => {
+    try {
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      return result.value || '[لم يتم العثور على محتوى نصي في الملف]';
+    } catch (error) {
+      console.error('Error parsing DOCX:', error);
+      return '[خطأ في قراءة ملف DOCX - يرجى التأكد من صحة الملف]';
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
