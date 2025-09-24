@@ -254,13 +254,6 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
           content
         }]);
         
-        // Add content to text area with file header for preview
-        setText(prev => {
-          const separator = prev ? '\n\n' : '';
-          const header = `--- ${file.name} ---\n`;
-          return prev + separator + header + content;
-        });
-        
       } catch (error) {
         console.error(`Failed to read file ${file.name}:`, error);
         setUploadedTextFiles(prev => prev.map(f => 
