@@ -417,9 +417,8 @@ const Results = () => {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="p-4 bg-white/10 rounded-lg backdrop-blur-sm">
-                          <div className="flex items-center justify-between mb-3">
+                          <div className="mb-3">
                             <span className="text-sm opacity-90">التصنيف المقترح</span>
-                            {file.classification?.confidence}
                           </div>
                           <p className="text-xl font-bold">
                             {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
