@@ -126,6 +126,7 @@ serve(async (req) => {
 
     } else if (operation === 'update_final_classification') {
       // Update existing record with final classification after satisfaction response
+      // Handle case where multiple records might exist for the same file_id
       const { data, error } = await supabase
         .from('transcription_results')
         .update({
@@ -133,8 +134,10 @@ serve(async (req) => {
           user_satisfaction: requestData.user_satisfaction
         })
         .eq('file_id', requestData.file_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .select()
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error('Error updating final classification:', error);
