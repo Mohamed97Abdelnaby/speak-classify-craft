@@ -256,7 +256,7 @@ const VoiceRecorder = () => {
               <Button
                 onClick={startRecording}
                 size="lg"
-                className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 py-4 rounded-xl shadow-glow"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-xl"
               >
                 <Mic className="w-6 h-6 ml-2" />
                 {t("startRecording")}
@@ -461,7 +461,7 @@ const VoiceRecorder = () => {
           onClick={handleTranscribe}
           disabled={uploadedFiles.length === 0 && !audioBlob}
           size="lg"
-          className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground py-4 text-lg font-medium rounded-xl shadow-glow"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-4 text-lg font-medium rounded-xl"
         >
           <Mic className="w-6 h-6 ml-2" />
           {t("transcribeNow")}

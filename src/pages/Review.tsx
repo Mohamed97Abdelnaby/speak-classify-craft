@@ -280,7 +280,7 @@ const Review = () => {
             </Button>
             <Button
               onClick={() => navigate("/")}
-              className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center space-x-2 space-x-reverse"
             >
               <RotateCcw className="w-4 h-4" />
               <span>{t("startOver")}</span>

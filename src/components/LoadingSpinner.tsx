@@ -12,9 +12,9 @@ const LoadingSpinner = ({ message }: LoadingSpinnerProps) => {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardContent className="flex flex-col items-center justify-center py-12">
-        <div className="relative mb-6">
-          {/* Animated gradient background */}
-          <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center relative">
+          <div className="relative mb-6">
+            {/* Animated solid background */}
+            <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center relative">
             {/* Mic icon */}
             <Mic className="w-10 h-10 text-primary-foreground" />
             {/* Spinning loader inside the mic icon */}

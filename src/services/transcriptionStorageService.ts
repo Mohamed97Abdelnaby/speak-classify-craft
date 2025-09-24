@@ -41,14 +41,27 @@ export const saveTranscriptionResult = async (data: SaveTranscriptionRequest): P
     });
 
     if (error) {
-      console.error('Error saving transcription result:', error);
+      console.error('Supabase function invoke error:', {
+        message: error.message,
+        details: error,
+        requestData: data
+      });
       return {
         success: false,
         error: error.message || 'Failed to save transcription result'
       };
     }
 
+    if (!result) {
+      console.error('No result returned from function');
+      return {
+        success: false,
+        error: 'No response from server'
+      };
+    }
+
     if (!result.success) {
+      console.error('Function returned error:', result.error);
       return {
         success: false,
         error: result.error || 'Failed to save transcription result'
@@ -62,7 +75,12 @@ export const saveTranscriptionResult = async (data: SaveTranscriptionRequest): P
     };
 
   } catch (error) {
-    console.error('Error calling save transcription service:', error);
+    console.error('Error calling save transcription service:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      requestData: data
+    });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred'

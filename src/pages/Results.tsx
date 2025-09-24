@@ -217,7 +217,7 @@ const Results = () => {
                 <Download className="w-4 h-4" />
                 <span>{t("export")}</span>
               </Button>
-              <Button onClick={handleNewTranscription} className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse">
+              <Button onClick={handleNewTranscription} className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center space-x-2 space-x-reverse">
                 <RotateCcw className="w-4 h-4" />
                 <span>{t("newTranscription")}</span>
               </Button>
@@ -276,7 +276,7 @@ const Results = () => {
         </main>
       </div>;
   }
-  return <div className="min-h-screen bg-gradient-secondary">
+  return <div className="min-h-screen bg-background">
       <Navigation />
       
       <main className="max-w-7xl mx-auto px-4 py-6">
@@ -304,7 +304,7 @@ const Results = () => {
               <Download className="w-4 h-4" />
               <span>{t("export")}</span>
             </Button>
-            <Button onClick={handleNewTranscription} className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse shadow-glow">
+            <Button onClick={handleNewTranscription} className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center space-x-2 space-x-reverse">
               <RotateCcw className="w-4 h-4" />
               <span>{t("newBatch")}</span>
             </Button>
@@ -344,7 +344,7 @@ const Results = () => {
                   <div className="space-y-6">
                     
                     {/* File Information Card */}
-                    <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border border-border/50 bg-gradient-accent">
+                    <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border border-border/50 bg-card">
                       <CardHeader className="pb-4">
                         <CardTitle className="text-xl arabic-text flex items-center gap-2">
                           <FileText className="w-5 h-5 text-primary" />
@@ -384,7 +384,7 @@ const Results = () => {
                     </Card>
 
                     {/* AI Classification Card */}
-                    <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border border-border/50 bg-gradient-primary text-primary-foreground">
+                    <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border border-border/50 bg-primary text-primary-foreground">
                       <CardHeader className="pb-4">
                         <CardTitle className="text-xl arabic-text flex items-center gap-2">
                           <Target className="w-5 h-5" />
@@ -408,10 +408,10 @@ const Results = () => {
                     </Card>
 
                     {/* Satisfaction Survey */}
-                    {!satisfactionAnswers[file.id] && <Card className="shadow-lg border-2 border-dashed border-primary/30 bg-gradient-accent">
+                    {!satisfactionAnswers[file.id] && <Card className="shadow-lg border-2 border-dashed border-primary/30 bg-card">
                         <CardContent className="pt-6">
                           <div className="text-center space-y-4">
-                            <div className="w-12 h-12 mx-auto bg-gradient-primary rounded-full flex items-center justify-center">
+                            <div className="w-12 h-12 mx-auto bg-primary rounded-full flex items-center justify-center">
                               <MessageSquare className="w-6 h-6 text-white" />
                             </div>
                             <h3 className="text-lg font-semibold arabic-text">
@@ -513,7 +513,7 @@ const Results = () => {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="p-6 bg-gradient-secondary rounded-xl max-h-[600px] overflow-y-auto border border-border/20">
+                        <div className="p-6 bg-muted rounded-xl max-h-[600px] overflow-y-auto border border-border/20">
                           <div className="prose prose-sm max-w-none" dir="rtl">
                             <p className="text-base leading-relaxed whitespace-pre-wrap arabic-text">
                               {file.summary || file.transcription || 'لا يوجد نص مستخرج'}

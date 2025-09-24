@@ -14,7 +14,7 @@ const Voice = () => {
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
             <Mic className="w-10 h-10 text-primary-foreground" />
           </div>
           <h1 className="text-4xl font-bold text-foreground mb-4">
@@ -29,7 +29,7 @@ const Voice = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
           <Card className="text-center hover:shadow-md transition-all duration-200">
             <CardContent className="p-6">
-              <div className="w-12 h-12 bg-gradient-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
                 <Mic className="w-6 h-6 text-primary" />
               </div>
               <h3 className="font-semibold text-foreground mb-2">{t("recordOrUpload")}</h3>
@@ -41,7 +41,7 @@ const Voice = () => {
           
           <Card className="text-center hover:shadow-md transition-all duration-200">
             <CardContent className="p-6">
-              <div className="w-12 h-12 bg-gradient-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
                 <Zap className="w-6 h-6 text-primary" />
               </div>
               <h3 className="font-semibold text-foreground mb-2">{t("aiProcessing")}</h3>
@@ -53,7 +53,7 @@ const Voice = () => {
           
           <Card className="text-center hover:shadow-md transition-all duration-200">
             <CardContent className="p-6">
-              <div className="w-12 h-12 bg-gradient-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
                 <Settings className="w-6 h-6 text-primary" />
               </div>
               <h3 className="font-semibold text-foreground mb-2">{t("customCategories")}</h3>
@@ -65,7 +65,7 @@ const Voice = () => {
           
           <Card className="text-center hover:shadow-md transition-all duration-200">
             <CardContent className="p-6">
-              <div className="w-12 h-12 bg-gradient-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageSquare className="w-6 h-6 text-primary" />
               </div>
               <h3 className="font-semibold text-foreground mb-2">{t("textInput")}</h3>

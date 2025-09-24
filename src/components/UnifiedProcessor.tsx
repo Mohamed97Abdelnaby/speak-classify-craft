@@ -577,7 +577,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
                 <Button
                   onClick={startRecording}
                   size="lg"
-                  className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 py-4 rounded-xl shadow-glow"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-xl"
                 >
                   <Mic className="w-6 h-6 ml-2" />
                   {t("startRecording")}
@@ -833,7 +833,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
           onClick={handleProcess}
           disabled={!hasAnyInput || isProcessing}
           size="lg"
-          className="flex-1 bg-gradient-primary hover:opacity-90 text-primary-foreground py-4 text-lg font-medium rounded-xl shadow-glow"
+          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-4 text-lg font-medium rounded-xl"
         >
           {isProcessing ? (
             <>
