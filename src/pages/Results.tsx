@@ -115,51 +115,31 @@ const Results = () => {
       localStorage.setItem(`batchData_${batchId}`, JSON.stringify(batchData));
     }
 
-    // Save complete transcription data to database for unsatisfied users
+    // Update final classification in database for unsatisfied users
     const fileToSave = files.find(f => f.id === fileId);
     if (fileToSave) {
       try {
-        // First save the basic transcription data
-        const saveResult = await saveTranscriptionResult({
-          file_name: fileToSave.name,
-          file_size: fileToSave.file?.size || 0,
-          transcription_text: fileToSave.transcription || '',
-          summary: fileToSave.summary || '',
-          ai_classification: fileToSave.classification?.aiClassification || fileToSave.classification?.predicted || '',
-          ai_confidence: fileToSave.classification?.confidence || 0,
-          batch_id: batchId || '',
-          file_id: fileId
-        });
-        if (saveResult.success) {
-          // Then update with satisfaction and verification data
-          const finalResult = await updateFinalClassification(fileId, verifiedCategory, 'not-satisfied');
-          if (finalResult.success) {
-            console.log('Complete transcription data saved for unsatisfied user:', fileId);
-            toast({
-              title: t("success"),
-              description: `${t("categoryVerifiedAs")} "${verifiedCategory}"`
-            });
-          } else {
-            console.error('Error updating final classification:', finalResult.error);
-            toast({
-              title: "خطأ",
-              description: "فشل في حفظ التصنيف النهائي",
-              variant: "destructive"
-            });
-          }
+        // Directly update with satisfaction and verification data
+        const finalResult = await updateFinalClassification(fileId, verifiedCategory, 'not-satisfied');
+        if (finalResult.success) {
+          console.log('Final classification updated for file:', fileId);
+          toast({
+            title: t("success"),
+            description: `${t("categoryVerifiedAs")} "${verifiedCategory}"`
+          });
         } else {
-          console.error('Error saving transcription data:', saveResult.error);
+          console.error('Error updating final classification:', finalResult.error);
           toast({
             title: "خطأ",
-            description: "فشل في حفظ البيانات",
+            description: "فشل في حفظ التصنيف النهائي",
             variant: "destructive"
           });
         }
       } catch (error) {
-        console.error('Error saving transcription data:', error);
+        console.error('Error updating final classification:', error);
         toast({
           title: "خطأ",
-          description: "فشل في حفظ البيانات",
+          description: "فشل في حفظ التصنيف النهائي",
           variant: "destructive"
         });
       }
