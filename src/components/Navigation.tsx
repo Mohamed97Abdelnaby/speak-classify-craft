@@ -24,12 +24,12 @@ const Navigation = () => {
     <nav className="bg-card border-b border-border px-6 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-3 space-x-reverse">
-          <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
-            <Mic className="w-7 h-7 text-primary-foreground" />
+          <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center">
+            <Mic className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-primary">RAYN</h1>
-            <p className="text-sm font-medium text-secondary">Information Technology</p>
+            <h1 className="text-xl font-bold text-foreground">{t("appName")}</h1>
+            <p className="text-sm text-muted-foreground">{t("tagline")}</p>
           </div>
         </div>
         
