@@ -94,25 +94,21 @@ const Results = () => {
     loadBatchData();
   }, [batchId, navigate]);
   const updateFileVerification = async (fileId: string, verifiedCategory: string) => {
-    setFiles(prev => prev.map(file => file.id === fileId ? {
+    const updatedFiles = files.map(file => file.id === fileId ? {
       ...file,
       classification: {
         ...file.classification!,
         verified: verifiedCategory
       }
-    } : file));
+    } : file);
+    
+    setFiles(updatedFiles);
 
-    // Update localStorage
+    // Update localStorage with the correct updated files
     if (batchId) {
       const batchData = {
         id: batchId,
-        files: files.map(file => file.id === fileId ? {
-          ...file,
-          classification: {
-            ...file.classification!,
-            verified: verifiedCategory
-          }
-        } : file),
+        files: updatedFiles,
         createdAt: new Date(),
         status: 'completed' as const
       };
@@ -421,7 +417,7 @@ const Results = () => {
                             <span className="text-sm opacity-90">التصنيف المقترح</span>
                           </div>
                           <p className="text-xl font-bold">
-                            {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
+                            {file.classification?.verified || file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
                           </p>
                           {file.classification?.confidence && <div className="mt-3">
                               
