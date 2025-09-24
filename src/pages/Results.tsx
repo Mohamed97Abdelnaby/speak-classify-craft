@@ -422,7 +422,7 @@ const Results = () => {
                             {file.classification?.confidence}
                           </div>
                           <p className="text-xl font-bold">
-                            {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
+                            {file.classification?.verified || file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
                           </p>
                           {file.classification?.confidence && <div className="mt-3">
                               
