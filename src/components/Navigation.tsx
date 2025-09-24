@@ -23,13 +23,15 @@ const Navigation = () => {
   return (
     <nav className="bg-card border-b border-border px-6 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-3 space-x-reverse">
-          <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center">
-            <Mic className="w-6 h-6 text-primary-foreground" />
-          </div>
+        <div className="flex items-center space-x-4 space-x-reverse">
+          <img 
+            src="/lovable-uploads/70f33e12-6580-4eee-a10c-9640e2924352.png" 
+            alt="RAYA Information Technology" 
+            className="h-12 w-auto"
+          />
           <div>
-            <h1 className="text-xl font-bold text-foreground">{t("appName")}</h1>
-            <p className="text-sm text-muted-foreground">{t("tagline")}</p>
+            <h1 className="text-2xl font-bold text-primary">RAYA</h1>
+            <p className="text-sm text-secondary font-medium">Information Technology</p>
           </div>
         </div>
         

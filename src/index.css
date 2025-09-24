@@ -6,36 +6,36 @@
 
 @layer base {
   :root {
-    /* Core Colors */
-    --background: 250 100% 99%;
-    --foreground: 223 39% 12%;
+    /* Core Colors - RAYA Brand */
+    --background: 0 0% 100%;
+    --foreground: 214 100% 22%;
 
-    /* Primary Brand Colors */
-    --primary: 231 48% 48%;
+    /* Primary Brand Colors - RAYA Dark Blue */
+    --primary: 214 100% 22%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 235 85% 65%;
+    --primary-glow: 212 43% 51%;
     
-    /* Secondary Colors */
-    --secondary: 240 19% 96%;
-    --secondary-foreground: 223 39% 12%;
+    /* Secondary Colors - RAYA Medium Blue */
+    --secondary: 212 43% 51%;
+    --secondary-foreground: 0 0% 100%;
     
-    /* Accent Colors */
-    --accent: 280 100% 97%;
-    --accent-foreground: 280 26% 16%;
+    /* Accent Colors - RAYA Medium Blue */
+    --accent: 212 43% 51%;
+    --accent-foreground: 0 0% 100%;
     
     /* Surface Colors */
     --card: 0 0% 100%;
-    --card-foreground: 223 39% 12%;
-    --card-hover: 240 19% 98%;
+    --card-foreground: 214 100% 22%;
+    --card-hover: 212 43% 96%;
     
     /* Interactive States */
-    --muted: 240 19% 96%;
-    --muted-foreground: 223 16% 58%;
+    --muted: 212 43% 95%;
+    --muted-foreground: 212 43% 40%;
     
     /* Borders & Inputs */
-    --border: 240 19% 91%;
-    --input: 240 19% 93%;
-    --ring: 231 48% 48%;
+    --border: 212 43% 85%;
+    --input: 212 43% 90%;
+    --ring: 214 100% 22%;
     
     /* Status Colors */
     --destructive: 0 72% 51%;
@@ -45,16 +45,16 @@
     --warning: 35 100% 50%;
     --warning-foreground: 0 0% 100%;
     
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(231 48% 48%) 0%, hsl(235 85% 65%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(240 19% 96%) 0%, hsl(240 100% 99%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(280 100% 97%) 0%, hsl(240 100% 99%) 100%);
+    /* Gradients - RAYA Brand */
+    --gradient-primary: linear-gradient(135deg, hsl(214 100% 22%) 0%, hsl(212 43% 51%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(212 43% 51%) 0%, hsl(212 43% 70%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(212 43% 95%) 0%, hsl(0 0% 100%) 100%);
     
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(223 39% 12% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(223 39% 12% / 0.1), 0 2px 4px -1px hsl(223 39% 12% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(223 39% 12% / 0.1), 0 4px 6px -2px hsl(223 39% 12% / 0.05);
-    --shadow-glow: 0 0 20px hsl(231 48% 48% / 0.3);
+    /* Shadows - RAYA Brand */
+    --shadow-sm: 0 1px 2px 0 hsl(214 100% 22% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(214 100% 22% / 0.1), 0 2px 4px -1px hsl(214 100% 22% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(214 100% 22% / 0.1), 0 4px 6px -2px hsl(214 100% 22% / 0.05);
+    --shadow-glow: 0 0 20px hsl(214 100% 22% / 0.3);
     
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
