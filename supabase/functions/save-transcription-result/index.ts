@@ -126,7 +126,7 @@ serve(async (req) => {
 
     } else if (operation === 'update_final_classification') {
       // Update existing record with final classification after satisfaction response
-      // Handle case where multiple records might exist for the same file_id
+      // First try to find and update existing record
       const { data, error } = await supabase
         .from('transcription_results')
         .update({
@@ -134,10 +134,8 @@ serve(async (req) => {
           user_satisfaction: requestData.user_satisfaction
         })
         .eq('file_id', requestData.file_id)
-        .order('created_at', { ascending: false })
-        .limit(1)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating final classification:', error);
@@ -145,8 +143,36 @@ serve(async (req) => {
       }
 
       if (!data) {
-        console.error('No record found with file_id:', requestData.file_id);
-        throw new Error(`No transcription record found with file_id: ${requestData.file_id}`);
+        // Record doesn't exist, create it with the provided information
+        console.log('No existing record found, creating new record for file_id:', requestData.file_id);
+        
+        const { data: newData, error: createError } = await supabase
+          .from('transcription_results')
+          .insert({
+            file_id: requestData.file_id,
+            file_name: requestData.file_id, // Use file_id as fallback for file_name
+            transcription_text: 'Text file content processed',
+            ai_classification: requestData.final_classification,
+            final_classification: requestData.final_classification,
+            user_satisfaction: requestData.user_satisfaction,
+            batch_id: requestData.batch_id
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Error creating new record:', createError);
+          throw createError;
+        }
+
+        console.log('Created new record with final classification for file:', requestData.file_id);
+        return new Response(JSON.stringify({ 
+          success: true, 
+          id: newData.id,
+          message: 'Final classification record created successfully'
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
 
       console.log('Updated final classification for file:', requestData.file_id);

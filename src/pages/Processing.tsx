@@ -118,6 +118,31 @@ const Processing = () => {
               aiClassification: classification.predicted
             }
           };
+
+          // Save transcription result to database
+          try {
+            const { saveTranscriptionResult } = await import('@/services/transcriptionStorageService');
+            const saveResult = await saveTranscriptionResult({
+              file_name: file.name,
+              file_size: file.file.size,
+              file_id: file.id,
+              transcription_text: result.text,
+              summary: summary,
+              ai_classification: classification.predicted,
+              ai_confidence: classification.confidence,
+              batch_id: batchId!
+            });
+            
+            if (saveResult.success) {
+              console.log(`Transcription result saved to database for ${file.name}`);
+            } else {
+              console.error(`Failed to save transcription to database for ${file.name}:`, saveResult.error);
+            }
+          } catch (dbError) {
+            console.error(`Database save error for ${file.name}:`, dbError);
+            // Continue processing even if database save fails
+          }
+
           completedCount++;
           setProcessedCount(completedCount);
 
