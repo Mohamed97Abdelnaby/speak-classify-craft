@@ -128,6 +128,32 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-arabic;
+  }
+
+  /* Enhanced RTL and Arabic support */
+  html[dir="rtl"] {
+    font-family: 'Cairo', system-ui, sans-serif;
+  }
+
+  /* Iframe compatibility improvements */
+  .iframe-container {
+    min-width: 320px;
+    overflow-x: auto;
+  }
+
+  /* Responsive card improvements */
+  @media (max-width: 768px) {
+    .results-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+
+  /* Better Arabic text rendering */
+  [lang="ar"], .arabic-text {
+    font-family: 'Cairo', system-ui, sans-serif;
+    font-feature-settings: "liga" 1;
+    text-rendering: optimizeLegibility;
   }
 }

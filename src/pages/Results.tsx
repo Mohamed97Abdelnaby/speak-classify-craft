@@ -351,15 +351,15 @@ const Results = () => {
 
         {/* File Navigation */}
         <div className="w-full">
-          <div className="flex w-full overflow-x-auto gap-2 pb-2">
+          <div className="flex w-full overflow-x-auto gap-2 xs:gap-3 pb-2 xs:pb-3">
             {files.map((file, index) => (
               <div 
                 key={file.id} 
-                className="flex-shrink-0 px-4 py-2 rounded-lg border bg-background min-w-[150px]"
+                className="flex-shrink-0 px-3 xs:px-4 py-2 rounded-lg border bg-background min-w-[120px] xs:min-w-[150px]"
               >
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <FileText className="w-4 h-4" />
-                  <span className="truncate">{t("file")} {index + 1}</span>
+                <div className="flex items-center space-x-1 xs:space-x-2 space-x-reverse">
+                  <FileText className="w-3 h-3 xs:w-4 xs:h-4" />
+                  <span className="truncate text-sm xs:text-base">{t("file")} {index + 1}</span>
                   {file.classification?.verified && <CheckCircle className="w-3 h-3 text-success" />}
                 </div>
               </div>
@@ -367,40 +367,40 @@ const Results = () => {
           </div>
           
           {/* Files displayed side by side */}
-          <div className="mt-6 overflow-x-auto">
-            <div className="flex gap-8 min-w-max pb-6">
+          <div className="mt-4 xs:mt-6 overflow-x-auto iframe-container">
+            <div className="flex gap-4 xs:gap-6 lg:gap-8 min-w-max pb-4 xs:pb-6">
               {files.map(file => (
-                <div key={file.id} className="flex-shrink-0 w-96 lg:w-[28rem]">
-                  <div className="space-y-6">
+                <div key={file.id} className="flex-shrink-0 w-full min-w-[280px] max-w-sm xs:max-w-md lg:max-w-[28rem]">
+                  <div className="space-y-4 xs:space-y-6">
                     {/* File Info */}
                     <Card className="shadow-md">
-                      <CardHeader className="pb-6">
-                        <CardTitle className="text-xl">معلومات الملف</CardTitle>
+                      <CardHeader className="pb-4 xs:pb-6">
+                        <CardTitle className="text-lg xs:text-xl arabic-text">معلومات الملف</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-3 xs:space-y-4">
                         <div>
-                          <p className="text-base font-medium">اسم الملف</p>
-                          <p className="text-base text-muted-foreground">{file.name}</p>
+                          <p className="text-sm xs:text-base font-medium arabic-text">اسم الملف</p>
+                          <p className="text-sm xs:text-base text-muted-foreground arabic-text">{file.name}</p>
                         </div>
                         <div>
-                          <p className="text-base font-medium">الحالة</p>
-                          <Badge variant="default" className="text-sm">مكتمل</Badge>
+                          <p className="text-sm xs:text-base font-medium arabic-text">الحالة</p>
+                          <Badge variant="default" className="text-xs xs:text-sm">مكتمل</Badge>
                         </div>
                         <div>
-                          <p className="text-base font-medium">التصنيف الأصلي</p>
-                          <Badge variant="outline" className="text-sm">{file.category || 'غير محدد'}</Badge>
+                          <p className="text-sm xs:text-base font-medium arabic-text">التصنيف الأصلي</p>
+                          <Badge variant="outline" className="text-xs xs:text-sm">{file.category || 'غير محدد'}</Badge>
                         </div>
                       </CardContent>
                     </Card>
 
                     {/* Transcription */}
                     <Card className="shadow-md">
-                      <CardHeader className="pb-6">
-                        <CardTitle className="text-xl">ملخص المحادثة</CardTitle>
+                      <CardHeader className="pb-4 xs:pb-6">
+                        <CardTitle className="text-lg xs:text-xl arabic-text">ملخص المحادثة</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="p-6 bg-muted/50 rounded-md max-h-80 overflow-y-auto">
-                          <p className="text-base leading-relaxed whitespace-pre-wrap" dir="rtl">
+                        <div className="p-3 xs:p-4 lg:p-6 bg-muted/50 rounded-md max-h-60 xs:max-h-80 overflow-y-auto">
+                          <p className="text-sm xs:text-base leading-relaxed whitespace-pre-wrap arabic-text" dir="rtl">
                             {file.summary || file.transcription || 'لا يوجد نص مستخرج'}
                           </p>
                         </div>
@@ -409,15 +409,15 @@ const Results = () => {
 
                     {/* Classification & Verification */}
                     <Card className="shadow-md">
-                      <CardHeader className="pb-6">
-                        <CardTitle className="text-xl">التصنيف</CardTitle>
+                      <CardHeader className="pb-4 xs:pb-6">
+                        <CardTitle className="text-lg xs:text-xl arabic-text">التصنيف</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-4 xs:space-y-6">
                         {/* Always show AI Classification */}
                         <div>
-                          <p className="text-base font-medium mb-3">{t('aiClassification')}</p>
+                          <p className="text-sm xs:text-base font-medium mb-2 xs:mb-3 arabic-text">{t('aiClassification')}</p>
                           <div className="flex items-center space-x-2">
-                            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-sm px-3 py-1">
+                            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs xs:text-sm px-2 xs:px-3 py-1">
                               {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
                             </Badge>
                           </div>
@@ -426,10 +426,10 @@ const Results = () => {
                         {/* Satisfaction Survey */}
                         {!satisfactionAnswers[file.id] && (
                           <Card className="border-2 border-dashed border-primary/30">
-                            <CardContent className="pt-6">
-                              <div className="text-center space-y-4">
-                                <h3 className="text-lg font-medium">{t('satisfactionQuestion')}</h3>
-                                <div className="flex justify-center gap-4">
+                            <CardContent className="pt-4 xs:pt-6">
+                              <div className="text-center space-y-3 xs:space-y-4">
+                                <h3 className="text-base xs:text-lg font-medium arabic-text">{t('satisfactionQuestion')}</h3>
+                                <div className="flex justify-center gap-2 xs:gap-4 flex-wrap">
                                   <Button 
                                     onClick={() => handleSatisfactionResponse(file.id, 'satisfied')} 
                                     variant="outline" 
