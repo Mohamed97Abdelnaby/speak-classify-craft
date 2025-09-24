@@ -139,8 +139,17 @@ const Results = () => {
     navigate("/");
   };
   const handleExport = () => {
-    // TODO: Implement export functionality
-    console.log("Export results");
+    if (files.length > 0) {
+      // Import and use beautiful download service for batch export
+      import("@/services/beautifulDownloadService").then(({ downloadBeautifulResults }) => {
+        downloadBeautifulResults(files, `voice-ai-batch-${Date.now()}.html`, true);
+      });
+      
+      toast({
+        title: "🎨 تم بدء التحميل",
+        description: "تم تحميل تقرير الدفعة بتصميم جميل وملون!",
+      });
+    }
   };
   const handleShare = () => {
     // TODO: Implement share functionality

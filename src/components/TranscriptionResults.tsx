@@ -65,19 +65,14 @@ const TranscriptionResults = () => {
       timestamp: new Date().toISOString()
     };
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `voice-analysis-${Date.now()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Import and use beautiful download service
+    import("@/services/beautifulDownloadService").then(({ downloadBeautifulResults }) => {
+      downloadBeautifulResults(data, `voice-analysis-${Date.now()}.html`, false);
+    });
 
     toast({
-      title: "Download started",
-      description: "Results have been downloaded as JSON file.",
+      title: "🎨 تم بدء التحميل",
+      description: "تم تحميل النتائج بتصميم جميل وملون!",
     });
   };
 
