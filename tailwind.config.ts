@@ -93,6 +93,8 @@ export default {
       },
       transitionTimingFunction: {
         'smooth': 'var(--transition-smooth)',
+        'fast': 'var(--transition-fast)',
+        'bounce': 'var(--transition-bounce)',
       },
       keyframes: {
         "accordion-down": {
@@ -115,6 +117,9 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fadeIn 0.5s ease-out",
+        "slide-up": "slideUp 0.4s ease-out",
+        "scale-in": "scaleIn 0.3s ease-out",
       },
     },
   },

@@ -6,7 +6,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, Share2, RotateCcw, CheckCircle, FileText } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  ArrowLeft, 
+  Download, 
+  Share2, 
+  RotateCcw, 
+  CheckCircle, 
+  FileText, 
+  Clock,
+  Target,
+  MessageSquare,
+  TrendingUp,
+  Copy,
+  ThumbsUp,
+  ThumbsDown,
+  AlertCircle,
+  Sparkles
+} from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { BatchFile } from "@/types/batch";
@@ -23,8 +41,49 @@ const Results = () => {
   const [files, setFiles] = useState<BatchFile[]>([]);
   const [satisfactionAnswers, setSatisfactionAnswers] = useState<Record<string, 'satisfied' | 'not-satisfied' | null>>({});
   const [categories, setCategories] = useState<string[]>([]);
+  const [activeFileIndex, setActiveFileIndex] = useState(0);
   const { toast } = useToast();
   const batchId = searchParams.get('batch');
+
+  // Get current active file
+  const currentFile = files[activeFileIndex];
+
+  // Helper functions
+  const getStatusColor = (fileId: string) => {
+    const satisfaction = satisfactionAnswers[fileId];
+    const file = files.find(f => f.id === fileId);
+    
+    if (satisfaction === 'satisfied') return 'status-satisfied';
+    if (satisfaction === 'not-satisfied' && file?.classification?.verified) return 'status-verified';
+    if (satisfaction === 'not-satisfied') return 'status-pending';
+    return 'bg-muted';
+  };
+
+  const getStatusIcon = (fileId: string) => {
+    const satisfaction = satisfactionAnswers[fileId];
+    const file = files.find(f => f.id === fileId);
+    
+    if (satisfaction === 'satisfied') return CheckCircle;
+    if (satisfaction === 'not-satisfied' && file?.classification?.verified) return Target;
+    if (satisfaction === 'not-satisfied') return AlertCircle;
+    return Clock;
+  };
+
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "تم النسخ ✨",
+        description: `تم نسخ ${label} إلى الحافظة`,
+      });
+    } catch (err) {
+      toast({
+        title: "خطأ",
+        description: "فشل في نسخ النص",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     const loadedCategories = getUserCategories();
@@ -302,46 +361,47 @@ const Results = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-secondary">
       <Navigation />
       
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
           <div className="flex items-center space-x-4">
             <Button 
               variant="outline" 
               size="sm" 
               onClick={() => navigate("/")} 
-              className="flex items-center space-x-2 space-x-reverse"
+              className="flex items-center space-x-2 space-x-reverse hover:shadow-md transition-all"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>{t("backToVoiceInput")}</span>
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
+                <Sparkles className="w-6 h-6 text-primary" />
                 {t("batchResults")} ({files.length} {files.length === 1 ? t("file") : t("files")})
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mt-1">
                 {t("reviewAndVerifyResults")}
               </p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-wrap gap-2">
             <EmailResultsDialog files={files} />
             <Button 
               variant="outline" 
               size="sm" 
               onClick={handleExport} 
-              className="flex items-center space-x-2 space-x-reverse"
+              className="flex items-center space-x-2 space-x-reverse hover:shadow-md transition-all"
             >
               <Download className="w-4 h-4" />
               <span>{t("export")}</span>
             </Button>
             <Button 
               onClick={handleNewTranscription} 
-              className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse"
+              className="bg-gradient-primary hover:opacity-90 text-primary-foreground flex items-center space-x-2 space-x-reverse shadow-glow"
             >
               <RotateCcw className="w-4 h-4" />
               <span>{t("newBatch")}</span>
@@ -349,167 +409,276 @@ const Results = () => {
           </div>
         </div>
 
-        {/* File Navigation */}
-        <div className="w-full">
-          <div className="flex w-full overflow-x-auto gap-2 xs:gap-3 pb-2 xs:pb-3">
-            {files.map((file, index) => (
-              <div 
-                key={file.id} 
-                className="flex-shrink-0 px-3 xs:px-4 py-2 rounded-lg border bg-background min-w-[120px] xs:min-w-[150px]"
-              >
-                <div className="flex items-center space-x-1 xs:space-x-2 space-x-reverse">
-                  <FileText className="w-3 h-3 xs:w-4 xs:h-4" />
-                  <span className="truncate text-sm xs:text-base">{t("file")} {index + 1}</span>
-                  {file.classification?.verified && <CheckCircle className="w-3 h-3 text-success" />}
-                </div>
+        {/* Enhanced File Navigation with Tabs */}
+        <div className="mb-8">
+          <Tabs value={activeFileIndex.toString()} onValueChange={(value) => setActiveFileIndex(parseInt(value))}>
+            <TabsList className="w-full h-auto p-2 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl shadow-md">
+              <div className="flex overflow-x-auto gap-2 w-full">
+                {files.map((file, index) => {
+                  const StatusIcon = getStatusIcon(file.id);
+                  const statusColor = getStatusColor(file.id);
+                  
+                  return (
+                    <TabsTrigger 
+                      key={file.id} 
+                      value={index.toString()}
+                      className="flex-shrink-0 min-w-[200px] h-16 p-4 flex flex-col items-start gap-1 text-left data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:border-primary/20 transition-all hover:scale-105"
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <div className={`w-3 h-3 rounded-full ${statusColor} flex items-center justify-center`}>
+                          <StatusIcon className="w-2 h-2 text-white" />
+                        </div>
+                        <span className="font-medium text-sm truncate flex-1">
+                          ملف {index + 1}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate w-full">
+                        {file.name}
+                      </p>
+                    </TabsTrigger>
+                  );
+                })}
               </div>
-            ))}
-          </div>
-          
-          {/* Files displayed side by side */}
-          <div className="mt-4 xs:mt-6 overflow-x-auto iframe-container">
-            <div className="flex gap-4 xs:gap-6 lg:gap-8 min-w-max pb-4 xs:pb-6">
-              {files.map(file => (
-                <div key={file.id} className="flex-shrink-0 w-full min-w-[280px] max-w-sm xs:max-w-md lg:max-w-[28rem]">
-                  <div className="space-y-4 xs:space-y-6">
-                    {/* File Info */}
-                    <Card className="shadow-md">
-                      <CardHeader className="pb-4 xs:pb-6">
-                        <CardTitle className="text-lg xs:text-xl arabic-text">معلومات الملف</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3 xs:space-y-4">
-                        <div>
-                          <p className="text-sm xs:text-base font-medium arabic-text">اسم الملف</p>
-                          <p className="text-sm xs:text-base text-muted-foreground arabic-text">{file.name}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm xs:text-base font-medium arabic-text">الحالة</p>
-                          <Badge variant="default" className="text-xs xs:text-sm">مكتمل</Badge>
-                        </div>
-                        <div>
-                          <p className="text-sm xs:text-base font-medium arabic-text">التصنيف الأصلي</p>
-                          <Badge variant="outline" className="text-xs xs:text-sm">{file.category || 'غير محدد'}</Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
+            </TabsList>
 
-                    {/* Transcription */}
-                    <Card className="shadow-md">
-                      <CardHeader className="pb-4 xs:pb-6">
-                        <CardTitle className="text-lg xs:text-xl arabic-text">ملخص المحادثة</CardTitle>
+            {/* File Content */}
+            {files.map((file, index) => (
+              <TabsContent 
+                key={file.id} 
+                value={index.toString()} 
+                className="mt-6 fade-in"
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  
+                  {/* Left Column - File Info & Classification */}
+                  <div className="space-y-6">
+                    
+                    {/* File Information Card */}
+                    <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border border-border/50 bg-gradient-accent">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="text-xl arabic-text flex items-center gap-2">
+                          <FileText className="w-5 h-5 text-primary" />
+                          معلومات الملف
+                        </CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <div className="p-3 xs:p-4 lg:p-6 bg-muted/50 rounded-md max-h-60 xs:max-h-80 overflow-y-auto">
-                          <p className="text-sm xs:text-base leading-relaxed whitespace-pre-wrap arabic-text" dir="rtl">
-                            {file.summary || file.transcription || 'لا يوجد نص مستخرج'}
-                          </p>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-background/60 rounded-lg">
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">اسم الملف</p>
+                            <p className="text-base font-semibold truncate">{file.name}</p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(file.name, "اسم الملف")}
+                            className="hover:bg-primary/10"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
                         </div>
-                      </CardContent>
-                    </Card>
+                        
+                        <div className="flex items-center justify-between p-3 bg-background/60 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${getStatusColor(file.id)}`} />
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">الحالة</p>
+                              <Badge variant="default" className="bg-success/10 text-success border-success/20">
+                                مكتمل
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
 
-                    {/* Classification & Verification */}
-                    <Card className="shadow-md">
-                      <CardHeader className="pb-4 xs:pb-6">
-                        <CardTitle className="text-lg xs:text-xl arabic-text">التصنيف</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4 xs:space-y-6">
-                        {/* Always show AI Classification */}
-                        <div>
-                          <p className="text-sm xs:text-base font-medium mb-2 xs:mb-3 arabic-text">{t('aiClassification')}</p>
-                          <div className="flex items-center space-x-2">
-                            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs xs:text-sm px-2 xs:px-3 py-1">
-                              {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
+                        {file.category && (
+                          <div className="p-3 bg-background/60 rounded-lg">
+                            <p className="text-sm font-medium text-muted-foreground mb-1">التصنيف الأصلي</p>
+                            <Badge variant="outline" className="bg-muted/50">
+                              {file.category}
                             </Badge>
                           </div>
-                        </div>
-
-                        {/* Satisfaction Survey */}
-                        {!satisfactionAnswers[file.id] && (
-                          <Card className="border-2 border-dashed border-primary/30">
-                            <CardContent className="pt-4 xs:pt-6">
-                              <div className="text-center space-y-3 xs:space-y-4">
-                                <h3 className="text-base xs:text-lg font-medium arabic-text">{t('satisfactionQuestion')}</h3>
-                                <div className="flex justify-center gap-2 xs:gap-4 flex-wrap">
-                                  <Button 
-                                    onClick={() => handleSatisfactionResponse(file.id, 'satisfied')} 
-                                    variant="outline" 
-                                    className="hover:bg-success/10 hover:border-success hover:text-success"
-                                  >
-                                    {t('yesSatisfied')}
-                                  </Button>
-                                  <Button 
-                                    onClick={() => handleSatisfactionResponse(file.id, 'not-satisfied')} 
-                                    variant="outline" 
-                                    className="hover:bg-destructive/10 hover:border-destructive hover:text-destructive"
-                                  >
-                                    {t('notSatisfied')}
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
                         )}
+                      </CardContent>
+                    </Card>
 
-                        {/* Show satisfaction result */}
-                        {satisfactionAnswers[file.id] === 'satisfied' && (
-                          <div className="mt-2 p-2 bg-success/10 rounded-md">
-                            <div className="flex items-center space-x-2">
-                              <CheckCircle className="w-3 h-3 text-success" />
-                              <span className="text-xs text-success">
-                                تم الموافقة على تصنيف الذكاء الاصطناعي
-                              </span>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Confirmation Classification - Only show when user is not satisfied */}
-                        {satisfactionAnswers[file.id] === 'not-satisfied' && (
-                          <div className="space-y-3">
-                            <div>
-                              <p className="text-sm font-medium mb-2">{t('confirmationClassification')}</p>
-                              {categories.length === 0 ? (
-                                <div className="text-center py-4 text-muted-foreground">
-                                  <p className="mb-2">لا توجد فئات متاحة</p>
-                                  <p className="text-sm">يرجى إضافة فئات في إعدادات التصنيف أولاً</p>
-                                </div>
-                              ) : (
-                                <Select 
-                                  value={file.classification?.verified || ""} 
-                                  onValueChange={value => updateFileVerification(file.id, value)}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="اختر التصنيف الصحيح" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {categories.map(category => (
-                                      <SelectItem key={category} value={category}>
-                                        {category}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              )}
-                            </div>
-                            
-                            {file.classification?.verified && (
-                              <div className="mt-2 p-2 bg-success/10 rounded-md">
-                                <div className="flex items-center space-x-2">
-                                  <CheckCircle className="w-3 h-3 text-success" />
-                                  <span className="text-xs text-success">
-                                    تم تأكيد التصنيف المصحح: {file.classification.verified}
-                                  </span>
-                                </div>
-                              </div>
+                    {/* AI Classification Card */}
+                    <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border border-border/50 bg-gradient-primary text-primary-foreground">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="text-xl arabic-text flex items-center gap-2">
+                          <Target className="w-5 h-5" />
+                          التصنيف الذكي
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-white/10 rounded-lg backdrop-blur-sm">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm opacity-90">التصنيف المقترح</span>
+                            {file.classification?.confidence && (
+                              <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                                {Math.round(file.classification.confidence * 100)}%
+                              </Badge>
                             )}
                           </div>
-                        )}
+                          <p className="text-xl font-bold">
+                            {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
+                          </p>
+                          {file.classification?.confidence && (
+                            <div className="mt-3">
+                              <div className="flex items-center gap-2 mb-2">
+                                <TrendingUp className="w-4 h-4" />
+                                <span className="text-sm opacity-90">مستوى الثقة</span>
+                              </div>
+                              <Progress 
+                                value={file.classification.confidence * 100} 
+                                className="h-2 bg-white/20"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Satisfaction Survey */}
+                    {!satisfactionAnswers[file.id] && (
+                      <Card className="shadow-lg border-2 border-dashed border-primary/30 bg-gradient-accent">
+                        <CardContent className="pt-6">
+                          <div className="text-center space-y-4">
+                            <div className="w-12 h-12 mx-auto bg-gradient-primary rounded-full flex items-center justify-center">
+                              <MessageSquare className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-lg font-semibold arabic-text">
+                              {t('satisfactionQuestion')}
+                            </h3>
+                            <p className="text-muted-foreground text-sm">
+                              هل توافق على تصنيف الذكاء الاصطناعي لهذا الملف؟
+                            </p>
+                            <div className="flex gap-3 justify-center">
+                              <Button
+                                onClick={() => handleSatisfactionResponse(file.id, 'satisfied')}
+                                className="bg-success hover:bg-success/90 text-success-foreground shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+                              >
+                                <ThumbsUp className="w-4 h-4" />
+                                موافق
+                              </Button>
+                              <Button
+                                onClick={() => handleSatisfactionResponse(file.id, 'not-satisfied')}
+                                variant="outline"
+                                className="border-destructive/20 hover:bg-destructive/10 hover:border-destructive/40 transition-all flex items-center gap-2"
+                              >
+                                <ThumbsDown className="w-4 h-4" />
+                                غير موافق
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Satisfaction Response Display */}
+                    {satisfactionAnswers[file.id] === 'satisfied' && (
+                      <Card className="shadow-lg border border-success/20 bg-success/5">
+                        <CardContent className="pt-6">
+                          <div className="text-center space-y-3">
+                            <div className="w-12 h-12 mx-auto bg-success rounded-full flex items-center justify-center">
+                              <CheckCircle className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-success arabic-text">
+                              تم تأكيد التصنيف
+                            </h3>
+                            <p className="text-muted-foreground text-sm">
+                              شكرًا لك! تم قبول تصنيف الذكاء الاصطناعي
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Category Selection for Not Satisfied */}
+                    {satisfactionAnswers[file.id] === 'not-satisfied' && !file.classification?.verified && (
+                      <Card className="shadow-lg border border-warning/20 bg-warning/5">
+                        <CardContent className="pt-6">
+                          <div className="space-y-4">
+                            <div className="text-center">
+                              <div className="w-12 h-12 mx-auto bg-warning rounded-full flex items-center justify-center mb-3">
+                                <AlertCircle className="w-6 h-6 text-white" />
+                              </div>
+                              <h3 className="text-lg font-semibold arabic-text">
+                                اختر التصنيف الصحيح
+                              </h3>
+                              <p className="text-muted-foreground text-sm mt-1">
+                                يرجى اختيار التصنيف المناسب لهذا الملف
+                              </p>
+                            </div>
+                            <Select onValueChange={(value) => updateFileVerification(file.id, value)}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="اختر التصنيف الصحيح" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {categories.map((category) => (
+                                  <SelectItem key={category} value={category}>
+                                    {category}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Verification Confirmation */}
+                    {satisfactionAnswers[file.id] === 'not-satisfied' && file.classification?.verified && (
+                      <Card className="shadow-lg border border-primary/20 bg-primary/5">
+                        <CardContent className="pt-6">
+                          <div className="text-center space-y-3">
+                            <div className="w-12 h-12 mx-auto bg-primary rounded-full flex items-center justify-center">
+                              <Target className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-primary arabic-text">
+                              تم التحقق من التصنيف
+                            </h3>
+                            <p className="text-muted-foreground text-sm">
+                              التصنيف الصحيح: <span className="font-semibold text-primary">{file.classification.verified}</span>
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+
+                  {/* Right Column - Transcription */}
+                  <div className="space-y-6">
+                    <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border border-border/50 bg-card">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="text-xl arabic-text flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="w-5 h-5 text-primary" />
+                            ملخص المحادثة
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(file.summary || file.transcription || '', "النص")}
+                            className="hover:bg-primary/10"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="p-6 bg-gradient-secondary rounded-xl max-h-[600px] overflow-y-auto border border-border/20">
+                          <div className="prose prose-sm max-w-none" dir="rtl">
+                            <p className="text-base leading-relaxed whitespace-pre-wrap arabic-text">
+                              {file.summary || file.transcription || 'لا يوجد نص مستخرج'}
+                            </p>
+                          </div>
+                        </div>
                       </CardContent>
                     </Card>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              </TabsContent>
+            ))}
+          </Tabs>
         </div>
       </main>
     </div>
