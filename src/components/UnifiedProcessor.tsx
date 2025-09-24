@@ -654,7 +654,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
             <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="font-medium mb-2">{t("dragDropFiles")}</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {t("supportedFormats")} + DOCX
+              {t("supportedFormats")}
             </p>
             <Button
               onClick={() => fileInputRef.current?.click()}
@@ -670,7 +670,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
             ref={fileInputRef}
             type="file"
             multiple
-            accept="audio/*,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            accept="audio/*,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             onChange={handleFileUpload}
             className="hidden"
           />
