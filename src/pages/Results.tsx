@@ -339,11 +339,11 @@ const Results = () => {
         <div className="mb-8">
           <Tabs value={activeFileIndex.toString()} onValueChange={value => setActiveFileIndex(parseInt(value))}>
             <TabsList className="w-full h-auto p-2 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl shadow-md">
-              <div className="flex overflow-x-auto gap-2 w-full">
+              <div className="flex overflow-x-auto gap-2 w-full py-[30px]">
                 {files.map((file, index) => {
                 const StatusIcon = getStatusIcon(file.id);
                 const statusColor = getStatusColor(file.id);
-                return <TabsTrigger key={file.id} value={index.toString()} className="flex-shrink-0 min-w-[200px] h-16 p-4 flex flex-col items-start gap-1 text-left data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:border-primary/20 transition-all hover:scale-105">
+                return <TabsTrigger key={file.id} value={index.toString()} className="flex-shrink-0 min-w-[200px] h-16 p-4 flex flex-col items-start gap-1 text-left data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:border-primary/20 transition-all hover:scale-105 py-[3px]">
                       <div className="flex items-center gap-2 w-full">
                         <div className={`w-3 h-3 rounded-full ${statusColor} flex items-center justify-center`}>
                           <StatusIcon className="w-2 h-2 text-white" />
@@ -422,7 +422,7 @@ const Results = () => {
                             {file.classification?.confidence}
                           </div>
                           <p className="text-xl font-bold">
-                            {file.classification?.verified || file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
+                            {file.classification?.aiClassification || file.classification?.predicted || 'لم يتم التصنيف بعد'}
                           </p>
                           {file.classification?.confidence && <div className="mt-3">
                               
