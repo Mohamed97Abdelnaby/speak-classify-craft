@@ -26,7 +26,7 @@ import { serializeBatchData } from "@/utils/fileSerializer";
 import { setBatchData } from "@/utils/indexedDbStorage";
 import { saveTranscriptionResult } from "@/services/transcriptionStorageService";
 import { getUserCategories } from "@/utils/categoryStorage";
-import mammoth from "mammoth";
+
 
 interface UnifiedProcessorProps {
   categories?: string[];
@@ -137,14 +137,9 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
   const handleTextFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     const textFiles = files.filter(file => isTextFile(file));
-    const docxFiles = files.filter(file => isDocxFile(file));
     
     if (textFiles.length > 0) {
       addTextFiles(textFiles);
-    }
-    
-    if (docxFiles.length > 0) {
-      addDocxFiles(docxFiles);
     }
     
     // Clear the input value to allow re-uploading the same file
@@ -155,30 +150,18 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
 
   const addFiles = (files: File[]) => {
     const audioFiles = files.filter(file => file.type.startsWith('audio/'));
-    const textFiles = files.filter(file => isTextFile(file));
-    const docxFiles = files.filter(file => isDocxFile(file));
-    const validFiles = [...audioFiles, ...textFiles, ...docxFiles];
+    const validFiles = audioFiles;
     const invalidFiles = files.length - validFiles.length;
     
     if (invalidFiles > 0) {
       toast({
         title: t("error"),
-        description: `${invalidFiles} ملف غير مدعوم تم تجاهله.`,
+        description: `${invalidFiles} ملف غير صوتي تم تجاهله.`,
         variant: "destructive",
       });
     }
     
-    // Handle text files separately
-    if (textFiles.length > 0) {
-      addTextFiles(textFiles);
-    }
-    
-    // Handle .docx files separately
-    if (docxFiles.length > 0) {
-      addDocxFiles(docxFiles);
-    }
-    
-    // Handle audio files as before
+    // Handle audio files
     const newBatchFiles: BatchFile[] = audioFiles.map(file => ({
       id: `${Date.now()}-${Math.random()}`,
       name: file.name,
@@ -213,11 +196,6 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
            textExtensions.some(ext => fileName.endsWith(ext));
   };
 
-  const isDocxFile = (file: File) => {
-    const fileName = file.name.toLowerCase();
-    return file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
-           fileName.endsWith('.docx');
-  };
 
   const addTextFiles = async (files: File[]) => {
     const validTextFiles = files.filter(file => isTextFile(file));
@@ -308,90 +286,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
     });
   };
 
-  const addDocxFiles = async (files: File[]) => {
-    if (files.length === 0) return;
 
-    // Check file sizes (limit to 20MB per file for documents)
-    const oversizedFiles = files.filter(file => file.size > 20 * 1024 * 1024);
-    if (oversizedFiles.length > 0) {
-      toast({
-        title: t("error"),
-        description: `${oversizedFiles.length} ملف كبير جداً (أكثر من 20 ميجابايت) تم تجاهله`,
-        variant: "destructive",
-      });
-    }
-
-    const validFiles = files.filter(file => file.size <= 20 * 1024 * 1024);
-    
-    setIsLoadingTextFiles(true);
-    
-    // Add files to tracking state
-    const fileEntries = validFiles.map(file => ({
-      id: `docx-${Date.now()}-${Math.random()}`,
-      name: file.name,
-      size: file.size,
-      status: 'loading' as const
-    }));
-    
-    setUploadedTextFiles(prev => [...prev, ...fileEntries]);
-
-    // Process files and extract content
-    for (let i = 0; i < validFiles.length; i++) {
-      const file = validFiles[i];
-      const entry = fileEntries[i];
-      
-      try {
-        // Read file as ArrayBuffer and parse with mammoth
-        const arrayBuffer = await file.arrayBuffer();
-        const content = await parseDocxContent(arrayBuffer);
-        
-        // Update file status
-        setUploadedTextFiles(prev => prev.map(f => 
-          f.id === entry.id ? { ...f, status: 'loaded' } : f
-        ));
-        
-        // Add content to text area with file header
-        setText(prev => {
-          const separator = prev ? '\n\n' : '';
-          const header = `--- ${file.name} (DOCX) ---\n`;
-          return prev + separator + header + content;
-        });
-        
-      } catch (error) {
-        console.error(`Failed to process DOCX file ${file.name}:`, error);
-        setUploadedTextFiles(prev => prev.map(f => 
-          f.id === entry.id ? { ...f, status: 'error' } : f
-        ));
-        
-        // Add error message to text area
-        setText(prev => {
-          const separator = prev ? '\n\n' : '';
-          const header = `--- ${file.name} (DOCX - خطأ) ---\n`;
-          const errorMsg = `[خطأ في معالجة الملف: ${file.name}]\n`;
-          return prev + separator + header + errorMsg;
-        });
-      }
-    }
-
-    setIsLoadingTextFiles(false);
-    
-    const successCount = validFiles.length;
-    toast({
-      title: t("success"),
-      description: `تم استخراج النص من ${successCount} ملف DOCX بنجاح`,
-    });
-  };
-
-  // Helper function to parse DOCX content using mammoth
-  const parseDocxContent = async (arrayBuffer: ArrayBuffer): Promise<string> => {
-    try {
-      const result = await mammoth.extractRawText({ arrayBuffer });
-      return result.value || '[لم يتم العثور على محتوى نصي في الملف]';
-    } catch (error) {
-      console.error('Error parsing DOCX:', error);
-      return '[خطأ في قراءة ملف DOCX - يرجى التأكد من صحة الملف]';
-    }
-  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
