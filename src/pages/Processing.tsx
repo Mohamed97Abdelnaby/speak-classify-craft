@@ -358,7 +358,7 @@ const Processing = () => {
         
         {currentStep === 'select-classify' && renderProviderSelection('التصنيف', () => classifyFiles(selectedProvider))}
         
-        {currentStep === 'show-classification' && renderResults('نتائج التصنيف', () => navigate(`/review?batch=${batchId}`))}
+        {currentStep === 'show-classification' && renderResults('نتائج التصنيف', () => navigate(`/results?batch=${batchId}`))}
         
         {(currentStep === 'transcribing' || currentStep === 'summarizing' || currentStep === 'classifying') && <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <LoadingSpinner message={customMessage || statusMessages[currentMessage]} />

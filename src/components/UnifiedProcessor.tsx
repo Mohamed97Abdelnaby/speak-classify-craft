@@ -500,8 +500,8 @@ const UnifiedProcessor = ({
       if (hasAudio) {
         navigate(`/processing?batch=${batchId}`);
       } else {
-        // For text-only input, go to review page like audio does
-        navigate(`/review?batch=${batchId}`);
+        // For text-only input, go to results page
+        navigate(`/results?batch=${batchId}`);
       }
     } catch (error) {
       console.error('Unified processing error:', error);
