@@ -20,7 +20,9 @@ export interface BatchData {
   files: BatchFile[];
   createdAt: Date;
   status: 'processing' | 'reviewing' | 'completed';
-  aiProvider?: 'openai' | 'groq';
+  transcriptionProvider?: 'openai' | 'groq';
+  summarizationProvider?: 'openai' | 'groq';
+  classificationProvider?: 'openai' | 'groq';
 }
 
 export interface EmailRequest {
