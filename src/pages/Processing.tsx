@@ -14,10 +14,13 @@ import { Zap } from "lucide-react";
 type ProcessingStep = 
   | 'select-transcribe' 
   | 'transcribing' 
+  | 'show-transcription'
   | 'select-summarize' 
-  | 'summarizing' 
+  | 'summarizing'
+  | 'show-summary' 
   | 'select-classify' 
-  | 'classifying' 
+  | 'classifying'
+  | 'show-classification' 
   | 'complete';
 
 const Processing = () => {
@@ -95,8 +98,8 @@ const Processing = () => {
       await updateBatchStorage({ ...batchData, files: updatedFiles, transcriptionProvider: provider });
     }
 
-    // Move to next step
-    setCurrentStep('select-summarize');
+    // Move to show transcription results
+    setCurrentStep('show-transcription');
     setProcessedCount(0);
   }, [batchData, updateBatchStorage]);
 
@@ -149,8 +152,8 @@ const Processing = () => {
       await updateBatchStorage({ ...batchData, files: updatedFiles, summarizationProvider: provider });
     }
 
-    // Move to next step
-    setCurrentStep('select-classify');
+    // Move to show summary results
+    setCurrentStep('show-summary');
     setProcessedCount(0);
   }, [batchData, updateBatchStorage]);
 
@@ -210,9 +213,8 @@ const Processing = () => {
       await updateBatchStorage({ ...batchData, files: updatedFiles, classificationProvider: provider });
     }
 
-    // Navigate to review when complete
-    setCurrentStep('complete');
-    navigate(`/review?batch=${batchId}`);
+    // Move to show classification results
+    setCurrentStep('show-classification');
   }, [batchData, updateBatchStorage, navigate, batchId]);
 
   // Rotate status messages
@@ -324,6 +326,52 @@ const Processing = () => {
     </div>
   );
 
+  // Results display UI
+  const renderResults = (title: string, onContinue: () => void) => (
+    <div className="flex flex-col items-center space-y-6 max-w-4xl mx-auto">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-center">{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="max-h-[60vh] overflow-y-auto space-y-4">
+            {batchData?.files.map((file, idx) => (
+              <Card key={file.id} className="p-4">
+                <h3 className="font-semibold mb-2">{file.name}</h3>
+                {currentStep === 'show-transcription' && file.transcription && (
+                  <div className="text-sm text-muted-foreground">
+                    <p className="font-medium mb-1">النص المكتوب:</p>
+                    <p className="whitespace-pre-wrap">{file.transcription}</p>
+                  </div>
+                )}
+                {currentStep === 'show-summary' && file.summary && (
+                  <div className="text-sm text-muted-foreground">
+                    <p className="font-medium mb-1">الملخص:</p>
+                    <p className="whitespace-pre-wrap">{file.summary}</p>
+                  </div>
+                )}
+                {currentStep === 'show-classification' && file.classification && (
+                  <div className="text-sm text-muted-foreground">
+                    <p className="font-medium mb-1">التصنيف:</p>
+                    <p>الفئة: {file.classification.predicted}</p>
+                    <p>الثقة: {(file.classification.confidence * 100).toFixed(1)}%</p>
+                  </div>
+                )}
+              </Card>
+            ))}
+          </div>
+          <Button
+            onClick={onContinue}
+            size="lg"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+          >
+            متابعة
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -334,14 +382,29 @@ const Processing = () => {
           () => transcribeFiles(selectedProvider)
         )}
         
+        {currentStep === 'show-transcription' && renderResults(
+          'نتائج تحويل الصوت إلى نص',
+          () => setCurrentStep('select-summarize')
+        )}
+        
         {currentStep === 'select-summarize' && renderProviderSelection(
           'التلخيص',
           () => summarizeFiles(selectedProvider)
         )}
         
+        {currentStep === 'show-summary' && renderResults(
+          'نتائج التلخيص',
+          () => setCurrentStep('select-classify')
+        )}
+        
         {currentStep === 'select-classify' && renderProviderSelection(
           'التصنيف',
           () => classifyFiles(selectedProvider)
+        )}
+        
+        {currentStep === 'show-classification' && renderResults(
+          'نتائج التصنيف',
+          () => navigate(`/review?batch=${batchId}`)
         )}
         
         {(currentStep === 'transcribing' || currentStep === 'summarizing' || currentStep === 'classifying') && (
