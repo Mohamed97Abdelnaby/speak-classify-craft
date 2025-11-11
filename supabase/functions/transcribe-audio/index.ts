@@ -65,7 +65,7 @@ serve(async (req) => {
       
       const transcriptionFormData = new FormData();
       transcriptionFormData.append('file', audioFile);
-      transcriptionFormData.append('model', 'gpt-4o-transcribe');
+      transcriptionFormData.append('model', 'whisper-1');
 
       console.log('Sending request to OpenAI...');
       response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
