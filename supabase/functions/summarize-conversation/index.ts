@@ -13,18 +13,13 @@ serve(async (req) => {
   }
 
   try {
-    const { transcription } = await req.json();
+    const { transcription, provider = 'openai' } = await req.json();
     
     if (!transcription) {
       throw new Error('No transcription text provided');
     }
 
-    console.log('Starting summarization for transcription:', transcription.substring(0, 100) + '...');
-
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
-    }
+    console.log(`Starting summarization for transcription with ${provider}:`, transcription.substring(0, 100) + '...');
 
     const systemPrompt = `لخّص المحادثة التالية في شكل حوار قصير ومباشر بين المحصل والعميل فقط، 
 مع المحافظة على الأسلوب البسيط واللغة العامية المستخدمة. 
@@ -39,26 +34,56 @@ serve(async (req) => {
 المحادثة:
 [ضع هنا نص المحادثة الأصلي]`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: transcription }
-        ],
-        max_completion_tokens: 1000,
-      }),
-    });
+    let response: Response;
+    
+    if (provider === 'groq') {
+      const groqApiKey = Deno.env.get('GROQ_API_KEY');
+      if (!groqApiKey) {
+        throw new Error('Groq API key not configured');
+      }
+
+      response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${groqApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: transcription }
+          ],
+          max_tokens: 1000,
+        }),
+      });
+    } else {
+      const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+      if (!openAIApiKey) {
+        throw new Error('OpenAI API key not configured');
+      }
+
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4.1-2025-04-14',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: transcription }
+          ],
+          max_completion_tokens: 1000,
+        }),
+      });
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', errorText);
-      throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
+      console.error(`${provider} API error:`, errorText);
+      throw new Error(`${provider} API error: ${response.status} ${errorText}`);
     }
 
     const data = await response.json();

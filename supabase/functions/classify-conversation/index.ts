@@ -15,13 +15,13 @@ serve(async (req) => {
   }
 
   try {
-    const { transcription } = await req.json();
+    const { transcription, provider = 'openai' } = await req.json();
 
     if (!transcription) {
       throw new Error('النص المنسوخ مطلوب للتصنيف');
     }
 
-    console.log('Starting classification for transcription:', transcription.substring(0, 100) + '...');
+    console.log(`Starting classification for transcription with ${provider}:`, transcription.substring(0, 100) + '...');
 
     const classificationPrompt = `You are an AI specialized in classifying customer behavior in debt collection conversations.  
 You will receive a dialogue between "المحصل" (collector) and "العميل" (customer).  
@@ -41,26 +41,56 @@ Based on the conversation, classify the customer into *one of the following type
 - Choose *only one category* that best fits the customer.  
 - Respond with the category name in Arabic *without explanation*.`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
-        messages: [
-          { role: 'system', content: classificationPrompt },
-          { role: 'user', content: transcription }
-        ],
-        max_completion_tokens: 100,
-      }),
-    });
+    let response: Response;
+    
+    if (provider === 'groq') {
+      const groqApiKey = Deno.env.get('GROQ_API_KEY');
+      if (!groqApiKey) {
+        throw new Error('Groq API key not configured');
+      }
+
+      response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${groqApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: classificationPrompt },
+            { role: 'user', content: transcription }
+          ],
+          max_tokens: 100,
+        }),
+      });
+    } else {
+      const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+      if (!openAIApiKey) {
+        throw new Error('OpenAI API key not configured');
+      }
+
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4.1-2025-04-14',
+          messages: [
+            { role: 'system', content: classificationPrompt },
+            { role: 'user', content: transcription }
+          ],
+          max_completion_tokens: 100,
+        }),
+      });
+    }
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+      const errorText = await response.text();
+      console.error(`${provider} API error:`, errorText);
+      throw new Error(`${provider} API error: ${response.status} ${errorText}`);
     }
 
     const data = await response.json();

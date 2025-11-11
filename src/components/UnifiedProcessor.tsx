@@ -54,6 +54,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
   
   // Processing states
   const [isProcessing, setIsProcessing] = useState(false);
+  const [aiProvider, setAiProvider] = useState<'openai' | 'groq'>('openai');
   
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -389,7 +390,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
         try {
           // Summarize text
           const summaryResponse = await supabase.functions.invoke('summarize-conversation', {
-            body: { transcription: text }
+            body: { transcription: text, provider: aiProvider }
           });
 
           let summary = '';
@@ -402,7 +403,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
           
           // Classify text
           const classifyResponse = await supabase.functions.invoke('classify-conversation', {
-            body: { transcription: text }
+            body: { transcription: text, provider: aiProvider }
           });
 
           if (classifyResponse.error) {
@@ -452,7 +453,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
           try {
             // Summarize text
             const summaryResponse = await supabase.functions.invoke('summarize-conversation', {
-              body: { transcription: textFile.content }
+              body: { transcription: textFile.content, provider: aiProvider }
             });
 
             let summary = '';
@@ -465,7 +466,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
             
             // Classify text
             const classifyResponse = await supabase.functions.invoke('classify-conversation', {
-              body: { transcription: textFile.content }
+              body: { transcription: textFile.content, provider: aiProvider }
             });
 
             if (classifyResponse.error) {
@@ -519,7 +520,8 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
         id: batchId,
         files: batchFiles,
         createdAt: new Date(),
-        status: hasAudio ? 'processing' : 'completed'
+        status: hasAudio ? 'processing' : 'completed',
+        aiProvider: aiProvider
       };
 
       // Store batch data
@@ -824,6 +826,39 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
             onChange={handleTextFileUpload}
             className="hidden"
           />
+        </CardContent>
+      </Card>
+
+      {/* AI Provider Selection */}
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="w-5 h-5 text-primary" />
+            اختر نموذج الذكاء الاصطناعي
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setAiProvider('openai')}
+              variant={aiProvider === 'openai' ? 'default' : 'outline'}
+              className="flex-1 h-12"
+            >
+              {aiProvider === 'openai' && <Badge className="ml-2" variant="secondary">✓</Badge>}
+              OpenAI
+            </Button>
+            <Button
+              onClick={() => setAiProvider('groq')}
+              variant={aiProvider === 'groq' ? 'default' : 'outline'}
+              className="flex-1 h-12"
+            >
+              {aiProvider === 'groq' && <Badge className="ml-2" variant="secondary">✓</Badge>}
+              Groq
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2 text-center">
+            سيتم استخدام {aiProvider === 'openai' ? 'OpenAI' : 'Groq'} لتحويل الصوت والتلخيص والتصنيف
+          </p>
         </CardContent>
       </Card>
 

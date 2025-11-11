@@ -6,7 +6,9 @@ export interface TranscriptionResult {
   error?: string;
 }
 
-export const transcribeAudio = async (audioFile: File): Promise<TranscriptionResult> => {
+export type AIProvider = 'openai' | 'groq';
+
+export const transcribeAudio = async (audioFile: File, provider: AIProvider = 'openai'): Promise<TranscriptionResult> => {
   try {
     console.log('Transcribing audio file:', {
       name: audioFile.name,
@@ -19,6 +21,9 @@ export const transcribeAudio = async (audioFile: File): Promise<TranscriptionRes
     // Prepare form data
     const formData = new FormData();
     formData.append('file', audioFile);
+    formData.append('provider', provider);
+    
+    console.log(`Transcribing with ${provider}...`);
     
     // Call the Supabase edge function
     const { data, error } = await supabase.functions.invoke('transcribe-audio', {

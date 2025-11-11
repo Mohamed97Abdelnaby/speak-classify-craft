@@ -30,6 +30,9 @@ const Processing = () => {
   const processAudioFiles = useCallback(async (batchData: BatchData) => {
     const updatedFiles = [...batchData.files];
     let completedCount = 0;
+    const provider = batchData.aiProvider || 'openai';
+    
+    console.log(`Processing with AI provider: ${provider}`);
     
     // Import serialization utility once
     const { serializeBatchData } = await import('@/utils/fileSerializer');
@@ -62,7 +65,7 @@ const Processing = () => {
       try {
         // Transcribe the audio file
         console.log('Calling transcribeAudio with file:', file.file.name);
-        const result = await transcribeAudio(file.file);
+        const result = await transcribeAudio(file.file, provider);
         console.log(`Transcription result for ${file.name}:`, result);
         
         if (result.success && result.text) {
@@ -74,7 +77,7 @@ const Processing = () => {
           
           const { supabase } = await import('@/integrations/supabase/client');
           const summaryResponse = await supabase.functions.invoke('summarize-conversation', {
-            body: { transcription: result.text }
+            body: { transcription: result.text, provider }
           });
 
           let summary = '';
@@ -91,7 +94,7 @@ const Processing = () => {
           setCustomMessage('تصنيف المحادثة...');
           
           const classificationResponse = await supabase.functions.invoke('classify-conversation', {
-            body: { transcription: result.text }
+            body: { transcription: result.text, provider }
           });
 
           let classification = {
