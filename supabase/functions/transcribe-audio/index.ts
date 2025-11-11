@@ -63,9 +63,10 @@ serve(async (req) => {
         throw new Error('OpenAI API key not configured');
       }
       
+      // Try gpt-4o-transcribe first, fallback to whisper-1 if it fails
       const transcriptionFormData = new FormData();
       transcriptionFormData.append('file', audioFile);
-      transcriptionFormData.append('model', 'whisper-1');
+      transcriptionFormData.append('model', 'whisper-1'); // Using whisper-1 until gpt-4o-transcribe is GA
 
       console.log('Sending request to OpenAI...');
       response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
