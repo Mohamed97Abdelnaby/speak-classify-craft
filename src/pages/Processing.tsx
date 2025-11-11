@@ -1,12 +1,13 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useTranslation } from "react-i18next";
 import { BatchFile, BatchData } from "@/types/batch";
-import { transcribeAudio } from "@/services/transcriptionService";
+import { transcribeAudio, AIProvider } from "@/services/transcriptionService";
 import { useToast } from "@/hooks/use-toast";
-import { saveTranscriptionResult } from "@/services/transcriptionStorageService";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 const Processing = () => {
   const { t } = useTranslation();
@@ -16,8 +17,16 @@ const Processing = () => {
   const [customMessage, setCustomMessage] = useState<string>("");
   const [processedCount, setProcessedCount] = useState(0);
   const [totalFiles, setTotalFiles] = useState(0);
+  const [currentProvider, setCurrentProvider] = useState<AIProvider>('openai');
+  const [currentOperation, setCurrentOperation] = useState<'transcribe' | 'summarize' | 'classify' | null>(null);
+  const providerRef = useRef<AIProvider>('openai');
   const batchId = searchParams.get('batch');
   const { toast } = useToast();
+  
+  // Sync ref with state
+  useEffect(() => {
+    providerRef.current = currentProvider;
+  }, [currentProvider]);
   
   const statusMessages = [
     t("listeningToCalls"),
@@ -30,9 +39,8 @@ const Processing = () => {
   const processAudioFiles = useCallback(async (batchData: BatchData) => {
     const updatedFiles = [...batchData.files];
     let completedCount = 0;
-    const provider = batchData.aiProvider || 'openai';
     
-    console.log(`Processing with AI provider: ${provider}`);
+    console.log(`Starting processing with initial provider: ${providerRef.current}`);
     
     // Import serialization utility once
     const { serializeBatchData } = await import('@/utils/fileSerializer');
@@ -64,20 +72,24 @@ const Processing = () => {
       
       try {
         // Transcribe the audio file
-        console.log('Calling transcribeAudio with file:', file.file.name);
-        const result = await transcribeAudio(file.file, provider);
+        setCurrentOperation('transcribe');
+        const transcribeProvider = providerRef.current;
+        console.log(`Transcribing with provider: ${transcribeProvider}`);
+        const result = await transcribeAudio(file.file, transcribeProvider);
         console.log(`Transcription result for ${file.name}:`, result);
         
         if (result.success && result.text) {
           console.log(`Transcription successful for ${file.name}:`, result.text.substring(0, 100) + '...');
           
           // Step 2: Summarize the transcription
-          console.log(`Summarizing file ${i + 1}/${updatedFiles.length}: ${file.name}`);
+          setCurrentOperation('summarize');
+          const summarizeProvider = providerRef.current;
+          console.log(`Summarizing file ${i + 1}/${updatedFiles.length} with provider: ${summarizeProvider}`);
           setCustomMessage('تلخيص المحادثة...');
           
           const { supabase } = await import('@/integrations/supabase/client');
           const summaryResponse = await supabase.functions.invoke('summarize-conversation', {
-            body: { transcription: result.text, provider }
+            body: { transcription: result.text, provider: summarizeProvider }
           });
 
           let summary = '';
@@ -89,12 +101,14 @@ const Processing = () => {
             console.log('Summary result:', summary);
           }
 
-          // Step 3: Classify the transcription  
-          console.log(`Classifying file ${i + 1}/${updatedFiles.length}: ${file.name}`);
+          // Step 3: Classify the transcription
+          setCurrentOperation('classify');
+          const classifyProvider = providerRef.current;
+          console.log(`Classifying file ${i + 1}/${updatedFiles.length} with provider: ${classifyProvider}`);
           setCustomMessage('تصنيف المحادثة...');
           
           const classificationResponse = await supabase.functions.invoke('classify-conversation', {
-            body: { transcription: result.text, provider }
+            body: { transcription: result.text, provider: classifyProvider }
           });
 
           let classification = {
@@ -149,8 +163,9 @@ const Processing = () => {
     }
 
     // Navigate to review page when all files are processed
+    setCurrentOperation(null);
     navigate(`/review?batch=${batchId}`);
-  }, [batchId, navigate, setProcessedCount]);
+  }, [batchId, navigate]);
   
   useEffect(() => {
     // Rotate messages every 3 seconds
@@ -181,6 +196,10 @@ const Processing = () => {
         if (serializedBatchData) {
           const batchData = deserializeBatchData(serializedBatchData);
           setTotalFiles(batchData.files.length);
+          
+          // Set initial provider from batch data
+          const initialProvider = batchData.aiProvider || 'openai';
+          setCurrentProvider(initialProvider);
           
           // Start processing audio files
           processAudioFiles(batchData);
@@ -230,6 +249,40 @@ const Processing = () => {
           )}
         </div>
       </main>
+
+      {/* Floating Provider Toggle */}
+      {currentOperation && (
+        <Card className="fixed bottom-8 right-8 p-4 shadow-lg border-2 border-primary/20">
+          <div className="flex flex-col gap-3">
+            <div className="text-sm font-medium text-foreground text-center">
+              {currentOperation === 'transcribe' && 'جاري النسخ'}
+              {currentOperation === 'summarize' && 'جاري التلخيص'}
+              {currentOperation === 'classify' && 'جاري التصنيف'}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={currentProvider === 'openai' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setCurrentProvider('openai')}
+                className="flex-1"
+              >
+                OpenAI
+              </Button>
+              <Button
+                variant={currentProvider === 'groq' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setCurrentProvider('groq')}
+                className="flex-1"
+              >
+                Groq
+              </Button>
+            </div>
+            <div className="text-xs text-muted-foreground text-center">
+              سيتم استخدام {currentProvider === 'openai' ? 'OpenAI' : 'Groq'} للعملية التالية
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };
