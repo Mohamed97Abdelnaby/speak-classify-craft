@@ -183,22 +183,22 @@ const Processing = () => {
             provider
           }
         });
-        let classification = {
-          predicted: file.category || 'غير مصنف',
-          confidence: Math.random() * 0.3 + 0.7
-        };
+        
+        let classificationResult = file.category || 'غير مصنف';
+
         if (classificationResponse.error) {
           console.error(`Classification failed for ${file.name}:`, classificationResponse.error);
-        } else {
-          classification = classificationResponse.data;
+        } else if (classificationResponse.data?.classification) {
+          classificationResult = classificationResponse.data.classification;
         }
+
         updatedFiles[i] = {
           ...file,
           status: 'completed',
           classification: {
-            predicted: classification.predicted,
-            confidence: classification.confidence,
-            aiClassification: classification.predicted
+            predicted: classificationResult,
+            confidence: 0.95,
+            aiClassification: classificationResult
           }
         };
         completedCount++;
