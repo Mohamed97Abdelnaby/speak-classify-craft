@@ -521,7 +521,7 @@ const UnifiedProcessor = ({ categories = [] }: UnifiedProcessorProps) => {
         files: batchFiles,
         createdAt: new Date(),
         status: hasAudio ? 'processing' : 'completed',
-        transcriptionProvider: aiProvider
+        aiProvider: aiProvider
       };
 
       // Store batch data
