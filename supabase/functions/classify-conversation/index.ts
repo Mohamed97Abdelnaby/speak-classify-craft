@@ -1,8 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -15,7 +13,8 @@ serve(async (req) => {
   }
 
   try {
-    const { transcription, provider = 'openai' } = await req.json();
+    const { transcription } = await req.json();
+    const provider = 'groq';
 
     if (!transcription) {
       throw new Error('النص المنسوخ مطلوب للتصنيف');
@@ -41,51 +40,26 @@ Based on the conversation, classify the customer into *one of the following type
 - Choose *only one category* that best fits the customer.  
 - Respond with the category name in Arabic *without explanation*.`;
 
-    let response: Response;
-    
-    if (provider === 'groq') {
-      const groqApiKey = Deno.env.get('GROQ_API_KEY');
-      if (!groqApiKey) {
-        throw new Error('Groq API key not configured');
-      }
-
-      response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${groqApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            { role: 'system', content: classificationPrompt },
-            { role: 'user', content: transcription }
-          ],
-          max_tokens: 100,
-        }),
-      });
-    } else {
-      const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-      if (!openAIApiKey) {
-        throw new Error('OpenAI API key not configured');
-      }
-
-      response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4.1-2025-04-14',
-          messages: [
-            { role: 'system', content: classificationPrompt },
-            { role: 'user', content: transcription }
-          ],
-          max_completion_tokens: 100,
-        }),
-      });
+    const groqApiKey = Deno.env.get('GROQ_API_KEY');
+    if (!groqApiKey) {
+      throw new Error('Groq API key not configured');
     }
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${groqApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'openai/gpt-oss-20b',
+        messages: [
+          { role: 'system', content: classificationPrompt },
+          { role: 'user', content: transcription }
+        ],
+        max_tokens: 100,
+      }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
