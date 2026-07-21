@@ -18,7 +18,7 @@ serve(async (req) => {
     console.log('Parsing form data...');
     const formData = await req.formData();
     const audioFile = formData.get('file') as File;
-    const provider = (formData.get('provider') as AIProvider) || 'openai';
+    const provider = 'groq' as AIProvider;
     
     if (!(audioFile instanceof File)) {
       throw new Error('Uploaded file is invalid or missing. Expected File object.');
@@ -36,47 +36,24 @@ serve(async (req) => {
 
     console.log(`Preparing transcription request for ${provider}...`);
     
-    let response: Response;
-    
-    if (provider === 'groq') {
-      const groqApiKey = Deno.env.get('GROQ_API_KEY');
-      if (!groqApiKey) {
-        throw new Error('Groq API key not configured');
-      }
-      
-      const transcriptionFormData = new FormData();
-      transcriptionFormData.append('file', audioFile);
-      transcriptionFormData.append('model', 'whisper-large-v3-turbo');
-      transcriptionFormData.append('response_format', 'json');
-
-      console.log('Sending request to Groq...');
-      response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${groqApiKey}`,
-        },
-        body: transcriptionFormData,
-      });
-    } else {
-      const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-      if (!openAIApiKey) {
-        throw new Error('OpenAI API key not configured');
-      }
-      
-      // Try gpt-4o-transcribe first, fallback to whisper-1 if it fails
-      const transcriptionFormData = new FormData();
-      transcriptionFormData.append('file', audioFile);
-      transcriptionFormData.append('model', 'whisper-1'); // Using whisper-1 until gpt-4o-transcribe is GA
-
-      console.log('Sending request to OpenAI...');
-      response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-        },
-        body: transcriptionFormData,
-      });
+    const groqApiKey = Deno.env.get('GROQ_API_KEY');
+    if (!groqApiKey) {
+      throw new Error('Groq API key not configured');
     }
+
+    const transcriptionFormData = new FormData();
+    transcriptionFormData.append('file', audioFile);
+    transcriptionFormData.append('model', 'whisper-large-v3-turbo');
+    transcriptionFormData.append('response_format', 'json');
+
+    console.log('Sending request to Groq...');
+    const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${groqApiKey}`,
+      },
+      body: transcriptionFormData,
+    });
 
     if (!response.ok) {
       const errorText = await response.text();

@@ -13,7 +13,8 @@ serve(async (req) => {
   }
 
   try {
-    const { transcription, provider = 'openai' } = await req.json();
+    const { transcription } = await req.json();
+    const provider = 'groq';
     
     if (!transcription) {
       throw new Error('No transcription text provided');
@@ -34,51 +35,26 @@ serve(async (req) => {
 المحادثة:
 [ضع هنا نص المحادثة الأصلي]`;
 
-    let response: Response;
-    
-    if (provider === 'groq') {
-      const groqApiKey = Deno.env.get('GROQ_API_KEY');
-      if (!groqApiKey) {
-        throw new Error('Groq API key not configured');
-      }
-
-      response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${groqApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: transcription }
-          ],
-          max_tokens: 1000,
-        }),
-      });
-    } else {
-      const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-      if (!openAIApiKey) {
-        throw new Error('OpenAI API key not configured');
-      }
-
-      response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4.1-2025-04-14',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: transcription }
-          ],
-          max_completion_tokens: 1000,
-        }),
-      });
+    const groqApiKey = Deno.env.get('GROQ_API_KEY');
+    if (!groqApiKey) {
+      throw new Error('Groq API key not configured');
     }
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${groqApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'openai/gpt-oss-20b',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: transcription }
+        ],
+        max_tokens: 1000,
+      }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
