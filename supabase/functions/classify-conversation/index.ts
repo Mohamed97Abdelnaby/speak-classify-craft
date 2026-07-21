@@ -52,7 +52,7 @@ Based on the conversation, classify the customer into *one of the following type
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-oss-20b',
+        model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: classificationPrompt },
           { role: 'user', content: transcription }
