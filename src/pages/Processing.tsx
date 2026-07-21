@@ -23,7 +23,7 @@ const Processing = () => {
   const [processedCount, setProcessedCount] = useState(0);
   const [totalFiles, setTotalFiles] = useState(0);
   const [batchData, setBatchDataState] = useState<BatchData | null>(null);
-  const [selectedProvider, setSelectedProvider] = useState<AIProvider>('openai');
+  const [selectedProvider, setSelectedProvider] = useState<AIProvider>('groq');
   const batchId = searchParams.get('batch');
   const {
     toast
@@ -288,20 +288,16 @@ const Processing = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-3">
-            <Button onClick={() => setSelectedProvider('openai')} variant={selectedProvider === 'openai' ? 'default' : 'outline'} className="flex-1 h-16 text-lg">
-              {selectedProvider === 'openai' && <Badge className="ml-2" variant="secondary">✓</Badge>}
-              OpenAI
-            </Button>
-            <Button onClick={() => setSelectedProvider('groq')} variant={selectedProvider === 'groq' ? 'default' : 'outline'} className="flex-1 h-16 text-lg">
-              {selectedProvider === 'groq' && <Badge className="ml-2" variant="secondary">✓</Badge>}
+            <Button onClick={() => setSelectedProvider('groq')} variant="default" className="flex-1 h-16 text-lg">
+              <Badge className="ml-2" variant="secondary">✓</Badge>
               Groq
             </Button>
           </div>
           <p className="text-sm text-muted-foreground text-center">
-            سيتم استخدام {selectedProvider === 'openai' ? 'OpenAI' : 'Groq'} لـ {stepName}
+            سيتم استخدام Groq لـ {stepName}
           </p>
           <Button onClick={onContinue} size="lg" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-            متابعة مع {selectedProvider === 'openai' ? 'OpenAI' : 'Groq'}
+            متابعة مع Groq
           </Button>
         </CardContent>
       </Card>
