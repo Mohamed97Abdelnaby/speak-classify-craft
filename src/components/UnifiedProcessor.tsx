@@ -54,7 +54,7 @@ const UnifiedProcessor = ({
 
   // Processing states
   const [isProcessing, setIsProcessing] = useState(false);
-  const [aiProvider, setAiProvider] = useState<'openai' | 'groq'>('openai');
+  const [aiProvider, setAiProvider] = useState<'openai' | 'groq'>('groq');
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
